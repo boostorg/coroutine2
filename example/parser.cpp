@@ -5,12 +5,19 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include <cstdio>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <sstream>
-#include <thread>
 
 #include <boost/coroutine2/all.hpp>
+
+class parser_error : public std::runtime_error {
+public:
+    parser_error() :
+        std::runtime_error("parsing failed") {
+    }
+};
 
 /*
  * grammar:
@@ -77,11 +84,11 @@ private:
              cb(next); 
              scan();
          }else{
-             exit(2);
+             throw parser_error();
          }
       }
       else{
-         exit(3);
+         throw parser_error();
       }
    }
 };
@@ -89,21 +96,30 @@ private:
 typedef boost::coroutines2::asymmetric_coroutine< char > coro_t;
 
 int main() {
-    std::istringstream is("1+1");
-    // invert control flow
-    coro_t::pull_type seq(
-            boost::coroutines2::fixedsize_stack(),
-            [&is]( coro_t::push_type & yield) {
+    try {
+        std::istringstream is("1+1");
+        // invert control flow
+        coro_t::pull_type seq(
+                boost::coroutines2::fixedsize_stack(),
+                [&is]( coro_t::push_type & yield) {
                 Parser p( is,
-                          [&yield](char ch){
-                            yield(ch);
-                          });
+                    [&yield](char ch){
+                    yield(ch);
+                    });
                 p.run();
-            });
+                });
 
-    // user-code pulls parsed data from parser
-    for(char c:seq){
-        printf("Parsed: %c\n",c);
+        // user-code pulls parsed data from parser
+        for(char c:seq){
+            printf("Parsed: %c\n",c);
+        }
+
+        std::cout << "\nDone" << std::endl;
+
+        return EXIT_SUCCESS;
+    } catch ( std::exception const& ex) {
+        std::cerr << "exception: " << ex.what() << std::endl;
     }
+    return EXIT_FAILURE;
 }
 
