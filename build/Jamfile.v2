@@ -8,9 +8,6 @@ import feature ;
 import modules ;
 import toolset ;
 
-feature.feature valgrind : on : optional propagated composite ;
-feature.compose <valgrind>on : <define>BOOST_USE_VALGRIND ;
-
 project boost/coroutine2
     : requirements
       <library>/boost/context//boost_context
