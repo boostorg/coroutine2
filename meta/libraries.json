@@ -1,10 +1,10 @@
 {
-    "key": "coroutine",
-    "name": "Coroutine",
+    "key": "coroutine2",
+    "name": "Coroutine2",
     "authors": [
         "Oliver Kowalke"
     ],
-    "description": "Coroutine library.",
+    "description": "(C++11) Coroutine library.",
     "category": [
         "Concurrent"
     ],
