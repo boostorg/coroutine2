@@ -75,17 +75,17 @@ struct push_coroutine< T & >::control_block {
 };
 
 struct push_coroutine< void >::control_block {
-    typename pull_coroutine< void >::control_block  *   other;
-    boost::context::execution_context                   caller;
-    boost::context::execution_context                   callee;
-    bool                                                preserve_fpu;
-    int                                                 state;
-    std::exception_ptr                                  except;
+    pull_coroutine< void >::control_block  *   other;
+    boost::context::execution_context          caller;
+    boost::context::execution_context          callee;
+    bool                                       preserve_fpu;
+    int                                        state;
+    std::exception_ptr                         except;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
 
-    explicit control_block( typename pull_coroutine< void >::control_block *);
+    explicit control_block( pull_coroutine< void >::control_block *);
 
     ~control_block();
 

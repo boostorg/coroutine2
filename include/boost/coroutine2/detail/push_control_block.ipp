@@ -238,7 +238,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 }
 
 inline
-push_coroutine< void >::control_block::control_block( typename pull_coroutine< void >::control_block * cb) :
+push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb) :
     other( cb),
     caller( other->callee),
     callee( other->caller),
