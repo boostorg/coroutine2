@@ -12,8 +12,6 @@
 #include <boost/config.hpp>
 #include <boost/context/execution_context.hpp>
 
-#include <boost/coroutine2/detail/rref.hpp>
-
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
 #endif
@@ -32,7 +30,7 @@ struct pull_coroutine< T >::control_block {
     std::exception_ptr                              except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
     explicit control_block( typename push_coroutine< T >::control_block *);
 
@@ -56,7 +54,7 @@ struct pull_coroutine< T & >::control_block {
     std::exception_ptr                                  except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
     explicit control_block( typename push_coroutine< T & >::control_block *);
 
@@ -71,17 +69,17 @@ struct pull_coroutine< T & >::control_block {
 };
 
 struct pull_coroutine< void >::control_block {
-    typename push_coroutine< void >::control_block  *   other;
-    boost::context::execution_context                   caller;
-    boost::context::execution_context                   callee;
-    bool                                                preserve_fpu;
-    int                                                 state;
-    std::exception_ptr                                  except;
+    push_coroutine< void >::control_block  *   other;
+    boost::context::execution_context          caller;
+    boost::context::execution_context          callee;
+    bool                                       preserve_fpu;
+    int                                        state;
+    std::exception_ptr                         except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
-    explicit control_block( typename push_coroutine< void >::control_block *);
+    explicit control_block( push_coroutine< void >::control_block *);
 
     ~control_block();
 

@@ -30,10 +30,13 @@ int& value7 = value1;
 int value8 = 0;
 int value9 = 0;
 
-struct X : private boost::noncopyable
+struct X
 {
     X() { value1 = 7; }
     ~X() { value1 = 0; }
+
+    X( X const&) = delete;
+    X & operator=( X const&) = delete;
 };
 
 class copyable

@@ -17,7 +17,6 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
-#include <boost/coroutine2/detail/rref.hpp>
 #include <boost/coroutine2/detail/state.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -33,18 +32,18 @@ namespace detail {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                   rref< Fn > rr, bool preserve_fpu_) :
+                                                   Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized pull_coroutine< T >
                    typename pull_coroutine< T >::control_block synthesized_cb( this);
                    pull_coroutine< T > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
@@ -132,18 +131,18 @@ push_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                     rref< Fn > rr, bool preserve_fpu_) :
+                                                     Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized pull_coroutine< T >
                    typename pull_coroutine< T & >::control_block synthesized_cb( this);
                    pull_coroutine< T & > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
@@ -208,18 +207,18 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 // push_coroutine< void >
 
 template< typename StackAllocator, typename Fn >
-push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, rref< Fn > rr, bool preserve_fpu_) :
+push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized pull_coroutine< T >
                    typename pull_coroutine< void >::control_block synthesized_cb( this);
                    pull_coroutine< void > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
@@ -238,7 +237,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 }
 
 inline
-push_coroutine< void >::control_block::control_block( typename pull_coroutine< void >::control_block * cb) :
+push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb) :
     other( cb),
     caller( other->callee),
     callee( other->caller),
