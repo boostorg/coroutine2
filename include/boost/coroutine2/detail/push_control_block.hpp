@@ -12,8 +12,6 @@
 #include <boost/config.hpp>
 #include <boost/context/execution_context.hpp>
 
-#include <boost/coroutine2/detail/rref.hpp>
-
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
 #endif
@@ -33,7 +31,7 @@ struct push_coroutine< T >::control_block {
     T                                           *   t;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
     explicit control_block( typename pull_coroutine< T >::control_block *);
 
@@ -60,7 +58,7 @@ struct push_coroutine< T & >::control_block {
     T                                               *   t;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
     explicit control_block( typename pull_coroutine< T & >::control_block *);
 
@@ -83,7 +81,7 @@ struct push_coroutine< void >::control_block {
     std::exception_ptr                         except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, rref< Fn >, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&, bool);
 
     explicit control_block( pull_coroutine< void >::control_block *);
 

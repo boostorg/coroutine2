@@ -16,7 +16,6 @@
 #include <boost/context/stack_context.hpp>
 
 #include <boost/coroutine2/detail/config.hpp>
-#include <boost/coroutine2/detail/rref.hpp>
 #include <boost/coroutine2/fixedsize_stack.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -48,7 +47,7 @@ push_coroutine< T >::push_coroutine( StackAllocator salloc, Fn && fn, bool prese
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
     cb_= new ( sp) control_block( context::preallocated( sp, size, sctx),
-                                  salloc, rref< Fn >( std::forward< Fn >( fn) ), preserve_fpu);
+                                  salloc, std::forward< Fn >( fn), preserve_fpu);
 }
 
 template< typename T >
@@ -111,7 +110,7 @@ push_coroutine< T & >::push_coroutine( StackAllocator salloc, Fn && fn, bool pre
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
     cb_ = new ( sp) control_block( context::preallocated( sp, size, sctx),
-                                   salloc, rref< Fn >( std::forward< Fn >( fn) ), preserve_fpu);
+                                   salloc, std::forward< Fn >( fn), preserve_fpu);
 }
 
 template< typename T >
@@ -165,7 +164,7 @@ push_coroutine< void >::push_coroutine( StackAllocator salloc, Fn && fn, bool pr
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
     cb_ = new ( sp) control_block( context::preallocated( sp, size, sctx),
-                                   salloc, rref< Fn >( std::forward< Fn >( fn) ), preserve_fpu);
+                                   salloc, std::forward< Fn >( fn), preserve_fpu);
 }
 
 inline

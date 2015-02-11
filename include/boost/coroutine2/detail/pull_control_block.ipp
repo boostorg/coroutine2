@@ -16,7 +16,6 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
-#include <boost/coroutine2/detail/rref.hpp>
 #include <boost/coroutine2/detail/state.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
@@ -32,18 +31,18 @@ namespace detail {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 pull_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                   rref< Fn > rr, bool preserve_fpu_) :
+                                                   Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized push_coroutine< T >
                    typename push_coroutine< T >::control_block synthesized_cb( this);
                    push_coroutine< T > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
@@ -107,18 +106,18 @@ pull_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 pull_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                     rref< Fn > rr, bool preserve_fpu_) :
+                                                     Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized push_coroutine< T >
                    typename push_coroutine< T & >::control_block synthesized_cb( this);
                    push_coroutine< T & > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
@@ -181,18 +180,18 @@ pull_coroutine< T & >::control_block::valid() const noexcept {
 
 template< typename StackAllocator, typename Fn >
 pull_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                      rref< Fn > rr, bool preserve_fpu_) :
+                                                      Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=] () mutable {
+            [=,fn=std::forward< Fn >( fn_)] () mutable {
                try {
                    // create synthesized push_coroutine< T >
                    typename push_coroutine< void >::control_block synthesized_cb( this);
                    push_coroutine< void > synthesized( & synthesized_cb);
                    other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
-                   rr( synthesized);
+                   fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
                } catch (...) {
