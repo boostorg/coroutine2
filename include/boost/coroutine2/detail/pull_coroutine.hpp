@@ -123,11 +123,7 @@ public:
             return * this;
         }
 
-        iterator operator++( int) {
-            iterator tmp( * this);
-            ++*this;
-            return tmp;
-        }
+        iterator operator++( int) = delete;
 
         reference_t operator*() const {
             return * c_->cb_->other->t;
@@ -240,11 +236,7 @@ public:
             return * this;
         }
 
-        iterator operator++( int) {
-            iterator tmp( * this);
-            ++*this;
-            return tmp;
-        }
+        iterator operator++( int) = delete;
 
         reference_t operator*() const {
             return * c_->cb_->other->t;
