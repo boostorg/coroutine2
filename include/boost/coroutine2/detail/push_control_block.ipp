@@ -53,7 +53,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.jump_to( preserve_fpu_);
+               caller.resume( preserve_fpu_);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
@@ -79,18 +79,18 @@ push_coroutine< T >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.jump_to( preserve_fpu);
+        callee.resume( preserve_fpu);
     }
 }
 
 template< typename T >
 void
-push_coroutine< T >::control_block::jump_to( T const& t_) {
+push_coroutine< T >::control_block::resume( T const& t_) {
     // store data on this stack
     // pass an pointer (address of tmp) to other context
     T tmp( t_);
     t = & tmp;
-    callee.jump_to( preserve_fpu);
+    callee.resume( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -103,12 +103,12 @@ push_coroutine< T >::control_block::jump_to( T const& t_) {
 
 template< typename T >
 void
-push_coroutine< T >::control_block::jump_to( T && t_) {
+push_coroutine< T >::control_block::resume( T && t_) {
     // store data on this stack
     // pass an pointer (address of tmp) to other context
     T tmp( std::move( t_) );
     t = & tmp;
-    callee.jump_to( preserve_fpu);
+    callee.resume( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -152,7 +152,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.jump_to( preserve_fpu_);
+               caller.resume( preserve_fpu_);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
@@ -178,15 +178,15 @@ push_coroutine< T & >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.jump_to( preserve_fpu);
+        callee.resume( preserve_fpu);
     }
 }
 
 template< typename T >
 void
-push_coroutine< T & >::control_block::jump_to( T & t_) {
+push_coroutine< T & >::control_block::resume( T & t_) {
     t = & t_;
-    callee.jump_to( preserve_fpu);
+    callee.resume( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -228,7 +228,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.jump_to( preserve_fpu_);
+               caller.resume( preserve_fpu_);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
@@ -252,14 +252,14 @@ push_coroutine< void >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.jump_to( preserve_fpu);
+        callee.resume( preserve_fpu);
     }
 }
 
 inline
 void
-push_coroutine< void >::control_block::jump_to() {
-    callee.jump_to( preserve_fpu);
+push_coroutine< void >::control_block::resume() {
+    callee.resume( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
     }

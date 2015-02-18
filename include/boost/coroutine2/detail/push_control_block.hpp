@@ -40,9 +40,9 @@ struct push_coroutine< T >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to( T const&);
+    void resume( T const&);
 
-    void jump_to( T &&);
+    void resume( T &&);
 
     bool valid() const noexcept;
 };
@@ -67,7 +67,7 @@ struct push_coroutine< T & >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to( T &);
+    void resume( T &);
 
     bool valid() const noexcept;
 };
@@ -90,7 +90,7 @@ struct push_coroutine< void >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to();
+    void resume();
 
     bool valid() const noexcept;
 };

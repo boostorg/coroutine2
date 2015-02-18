@@ -73,7 +73,7 @@ pull_coroutine< T >::pull_coroutine( pull_coroutine && other) :
 template< typename T >
 pull_coroutine< T > & 
 pull_coroutine< T >::operator()() {
-    cb_->jump_to();
+    cb_->resume();
     return * this;
 }
 
@@ -141,7 +141,7 @@ pull_coroutine< T & >::pull_coroutine( pull_coroutine && other) :
 template< typename T >
 pull_coroutine< T & > &
 pull_coroutine< T & >::operator()() {
-    cb_->jump_to();
+    cb_->resume();
     return * this;
 }
 
@@ -201,7 +201,7 @@ pull_coroutine< void >::pull_coroutine( pull_coroutine && other) :
 inline
 pull_coroutine< void > &
 pull_coroutine< void >::operator()() {
-    cb_->jump_to();
+    cb_->resume();
     return * this;
 }
 
