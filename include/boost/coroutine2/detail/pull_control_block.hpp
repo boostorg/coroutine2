@@ -39,7 +39,7 @@ struct pull_coroutine< T >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to();
+    void resume();
 
     bool valid() const noexcept;
 };
@@ -63,7 +63,7 @@ struct pull_coroutine< T & >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to();
+    void resume();
 
     bool valid() const noexcept;
 };
@@ -86,7 +86,7 @@ struct pull_coroutine< void >::control_block {
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
 
-    void jump_to();
+    void resume();
 
     bool valid() const noexcept;
 };

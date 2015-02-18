@@ -66,14 +66,14 @@ push_coroutine< T >::push_coroutine( push_coroutine && other) :
 template< typename T >
 push_coroutine< T > &
 push_coroutine< T >::operator()( T const& t) {
-    cb_->jump_to( t);
+    cb_->resume( t);
     return * this;
 }
 
 template< typename T >
 push_coroutine< T > &
 push_coroutine< T >::operator()( T && t) {
-    cb_->jump_to( std::forward< T >( t) );
+    cb_->resume( std::forward< T >( t) );
     return * this;
 }
 
@@ -129,7 +129,7 @@ push_coroutine< T & >::push_coroutine( push_coroutine && other) :
 template< typename T >
 push_coroutine< T & > &
 push_coroutine< T & >::operator()( T & t) {
-    cb_->jump_to( t);
+    cb_->resume( t);
     return * this;
 }
 
@@ -183,7 +183,7 @@ push_coroutine< void >::push_coroutine( push_coroutine && other) :
 inline
 push_coroutine< void > &
 push_coroutine< void >::operator()() {
-    cb_->jump_to();
+    cb_->resume();
     return * this;
 }
 
