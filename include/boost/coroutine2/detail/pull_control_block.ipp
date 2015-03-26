@@ -45,20 +45,16 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                    fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
-               } catch (...) {
-                   // store other exceptions in exception-pointer
-                   except = std::current_exception();
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.resume( preserve_fpu);
+               caller( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
-    callee.resume( preserve_fpu);
+    state( static_cast< int >( state_t::unwind) ) {
+    callee( preserve_fpu);
 }
 
 template< typename T >
@@ -67,8 +63,7 @@ pull_coroutine< T >::control_block::control_block( typename push_coroutine< T >:
     caller( other->callee),
     callee( other->caller),
     preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+    state( 0) {
 }
 
 template< typename T >
@@ -77,17 +72,14 @@ pull_coroutine< T >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.resume( preserve_fpu);
+        callee( preserve_fpu);
     }
 }
 
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    callee.resume( preserve_fpu);
-    if ( except) {
-        std::rethrow_exception( except);
-    }
+    callee( preserve_fpu);
     // test early-exit-flag
     if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
         throw forced_unwind();
@@ -120,20 +112,16 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                    fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
-               } catch (...) {
-                   // store other exceptions in exception-pointer
-                   except = std::current_exception();
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.resume( preserve_fpu);
+               caller( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
-    callee.resume( preserve_fpu);
+    state( static_cast< int >( state_t::unwind) ) {
+    callee( preserve_fpu);
 }
 
 template< typename T >
@@ -142,8 +130,7 @@ pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T 
     caller( other->callee),
     callee( other->caller),
     preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+    state( 0) {
 }
 
 template< typename T >
@@ -152,17 +139,14 @@ pull_coroutine< T & >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.resume( preserve_fpu);
+        callee( preserve_fpu);
     }
 }
 
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    callee.resume( preserve_fpu);
-    if ( except) {
-        std::rethrow_exception( except);
-    }
+    callee( preserve_fpu);
     // test early-exit-flag
     if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
         throw forced_unwind();
@@ -194,20 +178,16 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                    fn( synthesized);
                } catch ( forced_unwind const&) {
                    // do nothing for unwinding exception
-               } catch (...) {
-                   // store other exceptions in exception-pointer
-                   except = std::current_exception();
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller.resume( preserve_fpu);
+               caller( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
-    callee.resume( preserve_fpu);
+    state( static_cast< int >( state_t::unwind) ) {
+    callee( preserve_fpu);
 }
 
 inline
@@ -216,8 +196,7 @@ pull_coroutine< void >::control_block::control_block( push_coroutine< void >::co
     caller( other->callee),
     callee( other->caller),
     preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+    state( 0) {
 }
 
 inline
@@ -226,17 +205,14 @@ pull_coroutine< void >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee.resume( preserve_fpu);
+        callee( preserve_fpu);
     }
 }
 
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    callee.resume( preserve_fpu);
-    if ( except) {
-        std::rethrow_exception( except);
-    }
+    callee( preserve_fpu);
     // test early-exit-flag
     if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
         throw forced_unwind();

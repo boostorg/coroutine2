@@ -461,8 +461,8 @@ void test_unwind()
 
 void test_exceptions()
 {
-    bool thrown = false;
-    std::runtime_error ex("abc");
+    std::string msg("abc"), value;
+    std::runtime_error ex( msg);
     try
     {
         coro::coroutine< void >::push_type coro(
@@ -472,13 +472,9 @@ void test_exceptions()
         BOOST_CHECK( ! coro);
         BOOST_CHECK( false);
     }
-    catch ( std::runtime_error const&)
-    { thrown = true; }
-    catch ( std::exception const&)
-    {}
-    catch (...)
-    {}
-    BOOST_CHECK( thrown);
+    catch ( std::runtime_error const& ex)
+    { value = ex.what(); }
+    BOOST_CHECK_EQUAL( value, msg);
 }
 
 void test_input_iterator()
