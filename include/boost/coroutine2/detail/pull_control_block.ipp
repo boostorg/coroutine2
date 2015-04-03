@@ -48,9 +48,6 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               caller( preserve_fpu);
-               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
@@ -115,9 +112,6 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               caller( preserve_fpu);
-               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
@@ -181,9 +175,6 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               caller( preserve_fpu);
-               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
