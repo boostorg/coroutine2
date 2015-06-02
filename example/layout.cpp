@@ -49,5 +49,7 @@ int main(int argc,char* argv[]){
 
     std::copy(begin(words),end(words),begin(writer));
 
+    std::cout << "\nDone" << std::endl;
+
     return 0;
 }
