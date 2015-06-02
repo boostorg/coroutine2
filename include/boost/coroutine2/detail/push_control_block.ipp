@@ -37,11 +37,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized pull_coroutine< T >
+               typename pull_coroutine< T >::control_block synthesized_cb( this);
+               pull_coroutine< T > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized pull_coroutine< T >
-                   typename pull_coroutine< T >::control_block synthesized_cb( this);
-                   pull_coroutine< T > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -49,6 +49,8 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
@@ -122,11 +124,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized pull_coroutine< T >
+               typename pull_coroutine< T & >::control_block synthesized_cb( this);
+               pull_coroutine< T & > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized pull_coroutine< T >
-                   typename pull_coroutine< T & >::control_block synthesized_cb( this);
-                   pull_coroutine< T & > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -134,6 +136,8 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
@@ -187,11 +191,11 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized pull_coroutine< T >
+               typename pull_coroutine< void >::control_block synthesized_cb( this);
+               pull_coroutine< void > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized pull_coroutine< T >
-                   typename pull_coroutine< void >::control_block synthesized_cb( this);
-                   pull_coroutine< void > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -199,6 +203,8 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {

@@ -36,11 +36,11 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized push_coroutine< T >
+               typename push_coroutine< T >::control_block synthesized_cb( this);
+               push_coroutine< T > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized push_coroutine< T >
-                   typename push_coroutine< T >::control_block synthesized_cb( this);
-                   push_coroutine< T > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -48,6 +48,9 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               // jump back to caller
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
@@ -100,11 +103,11 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized push_coroutine< T >
+               typename push_coroutine< T & >::control_block synthesized_cb( this);
+               push_coroutine< T & > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized push_coroutine< T >
-                   typename push_coroutine< T & >::control_block synthesized_cb( this);
-                   push_coroutine< T & > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -112,6 +115,9 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               // jump back to caller
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
@@ -163,11 +169,11 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
             [=,fn=std::forward< Fn >( fn_)] () mutable {
+               // create synthesized push_coroutine< T >
+               typename push_coroutine< void >::control_block synthesized_cb( this);
+               push_coroutine< void > synthesized( & synthesized_cb);
+               other = & synthesized_cb;
                try {
-                   // create synthesized push_coroutine< T >
-                   typename push_coroutine< void >::control_block synthesized_cb( this);
-                   push_coroutine< void > synthesized( & synthesized_cb);
-                   other = & synthesized_cb;
                    // call coroutine-fn with synthesized push_coroutine as argument
                    fn( synthesized);
                } catch ( forced_unwind const&) {
@@ -175,6 +181,9 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
+               // jump back to caller
+               caller( preserve_fpu);
+               BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ) {
