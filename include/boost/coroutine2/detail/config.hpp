@@ -8,6 +8,7 @@
 #define BOOST_COROUTINES2_DETAIL_CONFIG_H
 
 #include <boost/config.hpp>
+#include <boost/context/detail/config.hpp>
 #include <boost/detail/workaround.hpp>
 
 #ifdef BOOST_COROUTINES2_DECL
@@ -43,7 +44,8 @@
 # define BOOST_COROUTINES2_SEGMENTS 10
 #endif
 
-#define BOOST_COROUTINES2_UNIDIRECT
-#define BOOST_COROUTINES2_SYMMETRIC
+#if defined(BOOST_CONTEXT_NO_EXECUTION_CONTEXT)
+# error "execution_context from boost.context not supported"
+#endif
 
 #endif // BOOST_COROUTINES2_DETAIL_CONFIG_H
