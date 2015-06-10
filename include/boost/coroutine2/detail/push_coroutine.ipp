@@ -7,6 +7,7 @@
 #ifndef BOOST_COROUTINES2_DETAIL_PUSH_COROUTINE_IPP
 #define BOOST_COROUTINES2_DETAIL_PUSH_COROUTINE_IPP
 
+#include <memory>
 #include <utility>
 
 #include <boost/assert.hpp>
@@ -44,8 +45,23 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T >::push_coroutine( StackAllocator salloc, Fn && fn, bool preserve_fpu) :
     cb_( nullptr) {
     context::stack_context sctx( salloc.allocate() );
+    // reserve space for control structure
+#if defined(BOOST_NO_CXX14_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
+#else
+    constexpr std::size_t func_alignment = 64; // alignof( control_block);
+    constexpr std::size_t func_size = sizeof( control_block);
+    // reserve space on stack
+    void * sp = static_cast< char * >( sctx.sp) - func_size - func_alignment;
+    // align sp pointer
+    std::size_t space = func_size + func_alignment;
+    sp = std::align( func_alignment, func_size, sp, space);
+    BOOST_ASSERT( nullptr != sp);
+    // calculate remaining size
+    std::size_t size = sctx.size - ( static_cast< char * >( sctx.sp) - static_cast< char * >( sp) );
+#endif
+    // placment new for control structure on coroutine stack
     cb_= new ( sp) control_block( context::preallocated( sp, size, sctx),
                                   salloc, std::forward< Fn >( fn), preserve_fpu);
 }
@@ -107,8 +123,23 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::push_coroutine( StackAllocator salloc, Fn && fn, bool preserve_fpu) :
     cb_( nullptr) {
     context::stack_context sctx( salloc.allocate() );
+    // reserve space for control structure
+#if defined(BOOST_NO_CXX14_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
+#else
+    constexpr std::size_t func_alignment = 64; // alignof( control_block);
+    constexpr std::size_t func_size = sizeof( control_block);
+    // reserve space on stack
+    void * sp = static_cast< char * >( sctx.sp) - func_size - func_alignment;
+    // align sp pointer
+    std::size_t space = func_size + func_alignment;
+    sp = std::align( func_alignment, func_size, sp, space);
+    BOOST_ASSERT( nullptr != sp);
+    // calculate remaining size
+    std::size_t size = sctx.size - ( static_cast< char * >( sctx.sp) - static_cast< char * >( sp) );
+#endif
+    // placment new for control structure on coroutine stack
     cb_ = new ( sp) control_block( context::preallocated( sp, size, sctx),
                                    salloc, std::forward< Fn >( fn), preserve_fpu);
 }
@@ -161,8 +192,23 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< void >::push_coroutine( StackAllocator salloc, Fn && fn, bool preserve_fpu) :
     cb_( nullptr) {
     context::stack_context sctx( salloc.allocate() );
+    // reserve space for control structure
+#if defined(BOOST_NO_CXX14_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
     void * sp = static_cast< char * >( sctx.sp) - sizeof( control_block);
     std::size_t size = sctx.size - sizeof( control_block);
+#else
+    constexpr std::size_t func_alignment = 64; // alignof( control_block);
+    constexpr std::size_t func_size = sizeof( control_block);
+    // reserve space on stack
+    void * sp = static_cast< char * >( sctx.sp) - func_size - func_alignment;
+    // align sp pointer
+    std::size_t space = func_size + func_alignment;
+    sp = std::align( func_alignment, func_size, sp, space);
+    BOOST_ASSERT( nullptr != sp);
+    // calculate remaining size
+    std::size_t size = sctx.size - ( static_cast< char * >( sctx.sp) - static_cast< char * >( sp) );
+#endif
+    // placment new for control structure on coroutine stack
     cb_ = new ( sp) control_block( context::preallocated( sp, size, sctx),
                                    salloc, std::forward< Fn >( fn), preserve_fpu);
 }
