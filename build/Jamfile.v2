@@ -20,6 +20,8 @@ project boost/coroutine2
       <threading>multi
     : usage-requirements
       <link>shared:<define>BOOST_COROUTINES2_DYN_LINK=1
+      <optimization>speed:<define>BOOST_DISABLE_ASSERTS
+      <variant>release:<define>BOOST_DISABLE_ASSERTS
     : source-location ../src
     ;
 
