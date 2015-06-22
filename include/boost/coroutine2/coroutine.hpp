@@ -22,13 +22,13 @@ namespace boost {
 namespace coroutines2 {
 
 template< typename T >
-struct asymmetric_coroutine {
+struct coroutine {
     typedef detail::pull_coroutine< T >     pull_type;
     typedef detail::push_coroutine< T >     push_type;
 };
 
 template< typename T >
-using coroutine = asymmetric_coroutine< T >;
+using asymmetric_coroutine = coroutine< T >;
 
 }}
 
