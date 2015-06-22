@@ -251,7 +251,7 @@ parser for parsed symbols.
            }
         };
 
-        typedef boost::coroutines2::asymmetric_coroutine< char > coro_t;
+        typedef boost::coroutines2::coroutine< char > coro_t;
 
         int main() {
             std::istringstream is("1+1");
@@ -382,7 +382,7 @@ data structure.
                         node::create("e")));
         }
 
-        typedef boost::coroutines2::asymmetric_coroutine<std::string>   coro_t;
+        typedef boost::coroutines2::coroutine<std::string>   coro_t;
 
         // recursively walk the tree, delivering values in order
         void traverse(node::ptr_t n,
@@ -441,7 +441,7 @@ data structure.
 
 This code shows how coroutines could be chained.
 
-        typedef boost::coroutines2::asymmetric_coroutine<std::string> coro_t;
+        typedef boost::coroutines2::coroutine<std::string> coro_t;
 
         // deliver each line of input stream to sink as a separate string
         void readlines(coro_t::push_type& sink,std::istream& in){

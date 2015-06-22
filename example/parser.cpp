@@ -93,7 +93,7 @@ private:
    }
 };
 
-typedef boost::coroutines2::asymmetric_coroutine< char > coro_t;
+typedef boost::coroutines2::coroutine< char > coro_t;
 
 int main() {
     try {

@@ -83,8 +83,8 @@ coroutine results in undefined behaviour.]
 
 As an example, the code below will result in undefined behaviour:
 
-        boost::coroutines2::asymmetric_coroutine<void>::push_type coro(
-            [&](boost::coroutines2::asymmetric_coroutine<void>::pull_type& yield){
+        boost::coroutines2::coroutine<void>::push_type coro(
+            [&](boost::coroutines2::coroutine<void>::pull_type& yield){
                 coro();
         });
         coro();
