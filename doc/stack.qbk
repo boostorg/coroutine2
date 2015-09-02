@@ -85,7 +85,7 @@ virtual addresses are used.]
 [variablelist
 [[Preconditions:] [`traits_type::minimum:size() <= size` and
 `! traits_type::is_unbounded() && ( traits_type::maximum:size() >= size)`.]]
-[[Effects:] [Allocates memory of at least `size` Bytes and stores a pointer
+[[Effects:] [Allocates memory of at least `size` bytes and stores a pointer
 to the stack and its actual size in `sctx`. Depending
 on the architecture (the stack grows downwards/upwards) the stored address is
 the highest/lowest address of the stack.]]
@@ -129,7 +129,7 @@ end of each stack. The memory is simply managed by `std::malloc()` and
 [variablelist
 [[Preconditions:] [`traits_type::minimum:size() <= size` and
 `! traits_type::is_unbounded() && ( traits_type::maximum:size() >= size)`.]]
-[[Effects:] [Allocates memory of at least `size` Bytes and stores a pointer to
+[[Effects:] [Allocates memory of at least `size` bytes and stores a pointer to
 the stack and its actual size in `sctx`. Depending on the architecture (the
 stack grows downwards/upwards) the stored address is the highest/lowest
 address of the stack.]]
@@ -155,7 +155,7 @@ In contrast to __protected_fixedsize__ and __fixedsize__ it creates a
 stack which grows on demand.
 
 [note Segmented stacks are currently only supported by [*gcc] from version
-[*4.7] [*clang] from version [*3.4] onwards. In order to use a
+[*4.7] and [*clang] from version [*3.4] onwards. In order to use a
 __segmented_stack__ __boost_coroutine__ must be built with
 [*toolset=gcc segmented-stacks=on] at b2/bjam command-line. Applications
 must be compiled with compiler-flags
@@ -181,7 +181,7 @@ must be compiled with compiler-flags
 [variablelist
 [[Preconditions:] [`traits_type::minimum:size() <= size` and
 `! traits_type::is_unbounded() && ( traits_type::maximum:size() >= size)`.]]
-[[Effects:] [Allocates memory of at least `size` Bytes and stores a pointer to
+[[Effects:] [Allocates memory of at least `size` bytes and stores a pointer to
 the stack and its actual size in `sctx`. Depending on the architecture (the
 stack grows downwards/upwards) the stored address is the highest/lowest
 address of the stack.]]
