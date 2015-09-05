@@ -36,7 +36,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> decltype( auto) {
+            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
                // create synthesized pull_coroutine< T >
                typename pull_coroutine< T >::control_block synthesized_cb( this);
                pull_coroutine< T > synthesized( & synthesized_cb);
@@ -134,7 +134,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> decltype( auto) {
+            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
                // create synthesized pull_coroutine< T >
                typename pull_coroutine< T & >::control_block synthesized_cb( this);
                pull_coroutine< T & > synthesized( & synthesized_cb);
@@ -209,7 +209,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
     other( nullptr),
     caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> decltype( auto) {
+            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
                // create synthesized pull_coroutine< T >
                typename pull_coroutine< void >::control_block synthesized_cb( this);
                pull_coroutine< void > synthesized( & synthesized_cb);
