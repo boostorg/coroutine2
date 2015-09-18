@@ -84,6 +84,7 @@ pull_coroutine< T >::control_block::~control_block() {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
@@ -159,6 +160,7 @@ pull_coroutine< T & >::control_block::~control_block() {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
@@ -233,6 +235,7 @@ pull_coroutine< void >::control_block::~control_block() {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);

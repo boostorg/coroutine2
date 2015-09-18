@@ -89,6 +89,7 @@ push_coroutine< T >::control_block::resume( T const& t_) {
     // pass an pointer (address of tmp) to other context
     T tmp( t_);
     t = & tmp;
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     t = nullptr;
     if ( except) {
@@ -107,6 +108,7 @@ push_coroutine< T >::control_block::resume( T && t_) {
     // pass an pointer (address of tmp) to other context
     T tmp( std::move( t_) );
     t = & tmp;
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     t = nullptr;
     if ( except) {
@@ -184,6 +186,7 @@ template< typename T >
 void
 push_coroutine< T & >::control_block::resume( T & t_) {
     t = & t_;
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     t = nullptr;
     if ( except) {
@@ -256,6 +259,7 @@ push_coroutine< void >::control_block::~control_block() {
 inline
 void
 push_coroutine< void >::control_block::resume() {
+    caller = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
