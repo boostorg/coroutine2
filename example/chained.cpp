@@ -9,55 +9,42 @@
 
 #include <boost/coroutine2/all.hpp>
 
-template<typename coroutine>
-struct test
-{
+template< typename coroutine >
+struct test {
     using pull_type = typename coroutine::pull_type;
     using push_type = typename coroutine::push_type;
 
     pull_type * child = nullptr;
 
-    void start_child_coroutine()
-    {
-        child = new pull_type
-        (
-            [](push_type & yield)
-            {
-                std::cout << "2";
-                yield();
-                std::cout << "2";
-                yield();
-                std::cout << "2";
-                yield();
-                std::cout << "2";
-                yield();
-                std::cout << "2";
-                yield();
-                std::cout << "2";
-            }
-        );
+    void start_child_coroutine() {
+        child = new pull_type([](push_type & yield) {
+                                std::cout << "2";
+                                yield();
+                                std::cout << "2";
+                                yield();
+                                std::cout << "2";
+                                yield();
+                                std::cout << "2";
+                                yield();
+                                std::cout << "2";
+                                yield();
+                                std::cout << "2";
+                              });
     }
 
-    pull_type start_parent_coroutine()
-    {
-        return pull_type
-        (
-            [this](push_type & yield)
-            {
-                std::cout << "1";
-                start_child_coroutine();
-                yield();
-                std::cout << "1";
-            }
-        );
+    pull_type start_parent_coroutine() {
+        return pull_type([=](push_type & yield) {
+                            std::cout << "1";
+                            start_child_coroutine();
+                            yield();
+                            std::cout << "1";
+                         });
     }
 
-    test()
-    {
+    test() {
         auto parent = start_parent_coroutine();
-        while (*child)
-        {
-            (*child)();
+        while ( * child) {
+            ( * child)();
         }
         std::cout << std::endl;
     }
@@ -65,6 +52,8 @@ struct test
 
 
 int main() {
-    test<boost::coroutines2::coroutine<void>> t2;
+    test< boost::coroutines2::coroutine< void > > t;
     std::cout << "Done" << std::endl;
+
+    return EXIT_SUCCESS;
 }
