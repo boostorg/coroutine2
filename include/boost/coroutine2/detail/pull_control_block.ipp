@@ -52,12 +52,13 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller( preserve_fpu);
+               other->callee( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
     except() {
+    // enter coroutine-fn in order to have first value available after ctor returns
     callee( preserve_fpu);
 }
 
@@ -84,7 +85,7 @@ pull_coroutine< T >::control_block::~control_block() {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    caller = boost::context::execution_context::current();
+    other->callee = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
@@ -128,12 +129,13 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller( preserve_fpu);
+               other->callee( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
     except() {
+    // enter coroutine-fn in order to have first value available after ctor returns
     callee( preserve_fpu);
 }
 
@@ -160,7 +162,7 @@ pull_coroutine< T & >::control_block::~control_block() {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    caller = boost::context::execution_context::current();
+    other->callee = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
@@ -203,12 +205,13 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= static_cast< int >( state_t::complete);
                // jump back to caller
-               caller( preserve_fpu);
+               other->callee( preserve_fpu);
                BOOST_ASSERT_MSG( false, "pull_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
     except() {
+    // enter coroutine-fn in order to have first value available after ctor returns
     callee( preserve_fpu);
 }
 
@@ -235,7 +238,7 @@ pull_coroutine< void >::control_block::~control_block() {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    caller = boost::context::execution_context::current();
+    other->callee = boost::context::execution_context::current();
     callee( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);

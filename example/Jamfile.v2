@@ -47,3 +47,7 @@ exe parser
 exe segmented
     : segmented.cpp
     ;
+
+exe chained
+    : chained.cpp
+    ;
