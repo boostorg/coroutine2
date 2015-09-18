@@ -11,14 +11,13 @@
 
 int main()
 {
-    int i = 0;
     boost::coroutines2::coroutine< void >::push_type sink(
         [&]( boost::coroutines2::coroutine< void >::pull_type & source) {
             std::cout << "inside coroutine-fn" << std::endl;
         });
     sink();
 
-    std::cout << "\nDone" << std::endl;
+    std::cout << "Done" << std::endl;
 
     return EXIT_SUCCESS;
 }
