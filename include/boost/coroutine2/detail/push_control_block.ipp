@@ -34,11 +34,10 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                    Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
+            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< T >::control_block synthesized_cb( this);
+               typename pull_coroutine< T >::control_block synthesized_cb( this, caller);
                pull_coroutine< T > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
@@ -67,10 +66,10 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
 }
 
 template< typename T >
-push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb) :
+push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
+                                                   boost::context::execution_context const& caller) :
     other( cb),
-    caller( other->callee),
-    callee( other->caller),
+    callee( caller),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except(),
@@ -139,11 +138,10 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                      Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
+            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< T & >::control_block synthesized_cb( this);
+               typename pull_coroutine< T & >::control_block synthesized_cb( this, caller);
                pull_coroutine< T & > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
@@ -172,10 +170,10 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
 }
 
 template< typename T >
-push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb) :
+push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
+                                                     boost::context::execution_context const& caller) :
     other( cb),
-    caller( other->callee),
-    callee( other->caller),
+    callee( caller),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except(),
@@ -220,11 +218,10 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    caller( boost::context::execution_context::current() ),
     callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_)] () mutable -> void {
+            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< void >::control_block synthesized_cb( this);
+               typename pull_coroutine< void >::control_block synthesized_cb( this, caller);
                pull_coroutine< void > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
@@ -252,10 +249,10 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 }
 
 inline
-push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb) :
+push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
+                                                      boost::context::execution_context const& caller) :
     other( cb),
-    caller( other->callee),
-    callee( other->caller),
+    callee( caller),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except() {
