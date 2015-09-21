@@ -34,14 +34,14 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                    Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
+    ctx( palloc, salloc,
+            [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< T >::control_block synthesized_cb( this, caller);
+               typename pull_coroutine< T >::control_block synthesized_cb( this, ctx);
                pull_coroutine< T > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
-               caller( preserve_fpu);
+               ctx( preserve_fpu);
                try {
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
@@ -53,8 +53,8 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               other->callee( preserve_fpu);
+               // jump back to ctx
+               other->ctx( preserve_fpu);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
@@ -62,14 +62,14 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
     except(),
     t( nullptr) {
     // enter coroutine-fn in order to get other set
-    callee( preserve_fpu);
+    ctx( preserve_fpu);
 }
 
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
-                                                   boost::context::execution_context const& caller) :
+                                                   boost::context::execution_context const& ctx_) :
     other( cb),
-    callee( caller),
+    ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except(),
@@ -82,7 +82,7 @@ push_coroutine< T >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee( preserve_fpu);
+        ctx( preserve_fpu);
     }
 }
 
@@ -93,8 +93,8 @@ push_coroutine< T >::control_block::resume( T const& t_) {
     // pass an pointer (address of tmp) to other context
     T tmp( t_);
     t = & tmp;
-    other->callee = boost::context::execution_context::current();
-    callee( preserve_fpu);
+    other->ctx = boost::context::execution_context::current();
+    ctx( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -112,8 +112,8 @@ push_coroutine< T >::control_block::resume( T && t_) {
     // pass an pointer (address of tmp) to other context
     T tmp( std::move( t_) );
     t = & tmp;
-    other->callee = boost::context::execution_context::current();
-    callee( preserve_fpu);
+    other->ctx = boost::context::execution_context::current();
+    ctx( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -138,14 +138,14 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                      Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
+    ctx( palloc, salloc,
+            [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< T & >::control_block synthesized_cb( this, caller);
+               typename pull_coroutine< T & >::control_block synthesized_cb( this, ctx);
                pull_coroutine< T & > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
-               caller( preserve_fpu);
+               ctx( preserve_fpu);
                try {
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
@@ -157,8 +157,8 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               other->callee( preserve_fpu);
+               // jump back to ctx
+               other->ctx( preserve_fpu);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
@@ -166,14 +166,14 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except(),
     t( nullptr) {
     // enter coroutine-fn in order to get other set
-    callee( preserve_fpu);
+    ctx( preserve_fpu);
 }
 
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
-                                                     boost::context::execution_context const& caller) :
+                                                     boost::context::execution_context const& ctx_) :
     other( cb),
-    callee( caller),
+    ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except(),
@@ -186,7 +186,7 @@ push_coroutine< T & >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee( preserve_fpu);
+        ctx( preserve_fpu);
     }
 }
 
@@ -194,8 +194,8 @@ template< typename T >
 void
 push_coroutine< T & >::control_block::resume( T & t_) {
     t = & t_;
-    other->callee = boost::context::execution_context::current();
-    callee( preserve_fpu);
+    other->ctx = boost::context::execution_context::current();
+    ctx( preserve_fpu);
     t = nullptr;
     if ( except) {
         std::rethrow_exception( except);
@@ -218,14 +218,14 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn_, bool preserve_fpu_) :
     other( nullptr),
-    callee( palloc, salloc,
-            [=,fn=std::forward< Fn >( fn_),caller=boost::context::execution_context::current()] () mutable -> void {
+    ctx( palloc, salloc,
+            [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] () mutable -> void {
                // create synthesized pull_coroutine< T >
-               typename pull_coroutine< void >::control_block synthesized_cb( this, caller);
+               typename pull_coroutine< void >::control_block synthesized_cb( this, ctx);
                pull_coroutine< void > synthesized( & synthesized_cb);
                other = & synthesized_cb;
                // jump back to ctor
-               caller( preserve_fpu);
+               ctx( preserve_fpu);
                try {
                    // call coroutine-fn with synthesized pull_coroutine as argument
                    fn( synthesized);
@@ -237,22 +237,22 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                }
                // set termination flags
                state |= static_cast< int >( state_t::complete);
-               // jump back to caller
-               other->callee( preserve_fpu);
+               // jump back to ctx
+               other->ctx( preserve_fpu);
                BOOST_ASSERT_MSG( false, "push_coroutine is complete");
             }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
     except() {
     // enter coroutine-fn in order to get other set
-    callee( preserve_fpu);
+    ctx( preserve_fpu);
 }
 
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
-                                                      boost::context::execution_context const& caller) :
+                                                      boost::context::execution_context const& ctx_) :
     other( cb),
-    callee( caller),
+    ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
     except() {
@@ -264,15 +264,15 @@ push_coroutine< void >::control_block::~control_block() {
          0 != ( state & static_cast< int >( state_t::unwind) ) ) {
         // set early-exit flag
         state |= static_cast< int >( state_t::early_exit);
-        callee( preserve_fpu);
+        ctx( preserve_fpu);
     }
 }
 
 inline
 void
 push_coroutine< void >::control_block::resume() {
-    other->callee = boost::context::execution_context::current();
-    callee( preserve_fpu);
+    other->ctx = boost::context::execution_context::current();
+    ctx( preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
     }
