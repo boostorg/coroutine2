@@ -23,7 +23,7 @@ namespace detail {
 template< typename T >
 struct pull_coroutine< T >::control_block {
     typename push_coroutine< T >::control_block *   other;
-    boost::context::execution_context               callee;
+    boost::context::execution_context               ctx;
     bool                                            preserve_fpu;
     int                                             state;
     std::exception_ptr                              except;
@@ -46,7 +46,7 @@ struct pull_coroutine< T >::control_block {
 template< typename T >
 struct pull_coroutine< T & >::control_block {
     typename push_coroutine< T & >::control_block   *   other;
-    boost::context::execution_context                   callee;
+    boost::context::execution_context                   ctx;
     bool                                                preserve_fpu;
     int                                                 state;
     std::exception_ptr                                  except;
@@ -68,7 +68,7 @@ struct pull_coroutine< T & >::control_block {
 
 struct pull_coroutine< void >::control_block {
     push_coroutine< void >::control_block  *    other;
-    boost::context::execution_context           callee;
+    boost::context::execution_context           ctx;
     bool                                        preserve_fpu;
     int                                         state;
     std::exception_ptr                          except;

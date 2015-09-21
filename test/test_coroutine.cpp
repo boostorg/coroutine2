@@ -570,6 +570,50 @@ void test_no_result()
     BOOST_CHECK( ! coro);
 }
 
+std::vector< int > vec;
+coro::coroutine< void >::pull_type * child = nullptr;
+
+void start_child_coroutine() {
+    child = new coro::coroutine< void >::pull_type([](coro::coroutine< void >::push_type & yield) {
+            vec.push_back( 2);
+            yield();
+            vec.push_back( 2);
+            yield();
+            vec.push_back( 2);
+            yield();
+            vec.push_back( 2);
+            yield();
+            vec.push_back( 2);
+            yield();
+            vec.push_back( 2);
+            });
+}
+
+coro::coroutine< void >::pull_type start_parent_coroutine() {
+    return coro::coroutine< void >::pull_type([=](coro::coroutine< void >::push_type & yield) {
+            vec.push_back( 1);
+            start_child_coroutine();
+            yield();
+            vec.push_back( 1);
+            });
+}
+
+void test_chaining()
+{
+    auto parent = start_parent_coroutine();
+    while ( * child) {
+        ( * child)();
+    }
+    BOOST_CHECK_EQUAL( 7, vec.size() );
+    BOOST_CHECK_EQUAL( 1, vec[0]);
+    BOOST_CHECK_EQUAL( 2, vec[1]);
+    BOOST_CHECK_EQUAL( 2, vec[2]);
+    BOOST_CHECK_EQUAL( 2, vec[3]);
+    BOOST_CHECK_EQUAL( 2, vec[4]);
+    BOOST_CHECK_EQUAL( 2, vec[5]);
+    BOOST_CHECK_EQUAL( 2, vec[6]);
+}
+
 boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
 {
     boost::unit_test::test_suite * test =
@@ -593,6 +637,7 @@ boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
     test->add( BOOST_TEST_CASE( & test_exceptions) );
     test->add( BOOST_TEST_CASE( & test_input_iterator) );
     test->add( BOOST_TEST_CASE( & test_output_iterator) );
+    test->add( BOOST_TEST_CASE( & test_chaining) );
 
     return test;
 }
