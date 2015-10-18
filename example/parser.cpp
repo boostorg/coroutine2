@@ -100,7 +100,6 @@ int main() {
         std::istringstream is("1+1");
         // invert control flow
         coro_t::pull_type seq(
-                boost::coroutines2::fixedsize_stack(),
                 [&is]( coro_t::push_type & yield) {
                 Parser p( is,
                     [&yield](char ch){

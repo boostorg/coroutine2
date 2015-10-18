@@ -36,16 +36,4 @@
 # include <boost/config/auto_link.hpp>
 #endif
 
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-# if ! ( (defined(__GNUC__) && __GNUC__ > 3 && __GNUC_MINOR__ > 6) || \
-         (defined(__clang__) && __clang_major__ > 2 && __clang_minor__ > 3) )
-#  error "compiler does not support segmented_stack stacks"
-# endif
-# define BOOST_COROUTINES2_SEGMENTS 10
-#endif
-
-#if defined(BOOST_CONTEXT_NO_EXECUTION_CONTEXT)
-# error "execution_context from boost.context not supported"
-#endif
-
 #endif // BOOST_COROUTINES2_DETAIL_CONFIG_H

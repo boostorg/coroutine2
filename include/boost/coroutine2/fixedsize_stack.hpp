@@ -23,6 +23,9 @@ namespace boost {
 namespace coroutines2 {
 
 typedef boost::context::fixedsize_stack fixedsize_stack;
+#if !defined(BOOST_USE_SEGMENTED_STACKS)
+typedef boost::context::default_stack   default_stack;
+#endif
 
 }}
 
