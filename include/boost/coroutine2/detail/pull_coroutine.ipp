@@ -107,8 +107,8 @@ pull_coroutine< T >::operator!() const noexcept {
 
 template< typename T >
 T
-pull_coroutine< T >::get() const noexcept {
-    return std::move( * cb_->other->t);
+pull_coroutine< T >::get() {
+    return std::move( cb_->get() );
 }
 
 
@@ -190,8 +190,8 @@ pull_coroutine< T & >::operator!() const noexcept {
 
 template< typename T >
 T &
-pull_coroutine< T & >::get() const noexcept {
-    return * cb_->other->t;
+pull_coroutine< T & >::get() {
+    return cb_->get();
 }
 
 

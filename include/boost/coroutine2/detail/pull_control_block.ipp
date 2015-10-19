@@ -57,9 +57,11 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
          }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
-    except() {
-    // enter coroutine-fn in order to have first value available after ctor returns
-    ctx( nullptr, preserve_fpu);
+    except(),
+    bvalid( false),
+    storage() {
+    // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
+    set( reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) ) );
 }
 
 template< typename T >
@@ -69,7 +71,9 @@ pull_coroutine< T >::control_block::control_block( typename push_coroutine< T >:
     ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
-    except() {
+    except(),
+    bvalid( false),
+    storage() {
 }
 
 template< typename T >
@@ -80,13 +84,17 @@ pull_coroutine< T >::control_block::~control_block() {
         state |= static_cast< int >( state_t::early_exit);
         ctx( nullptr, preserve_fpu);
     }
+    // destroy data if it set
+    if ( bvalid) {
+        reinterpret_cast< T const* >( storage)->~T();
+    }
 }
 
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
+    set( reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) ) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -97,9 +105,30 @@ pull_coroutine< T >::control_block::resume() {
 }
 
 template< typename T >
+void
+pull_coroutine< T >::control_block::set( T * t) {
+    // destroy data if it set
+    if ( bvalid) {
+        reinterpret_cast< T const* >( storage)->~T();
+    }
+    if ( nullptr != t) {
+        new ( storage) T( std::move( * t) ); // FIXME: differrentiation between move/copy
+        bvalid = true;
+    } else {
+        bvalid = false;
+    }
+}
+
+template< typename T >
+T &
+pull_coroutine< T >::control_block::get() {
+    return * reinterpret_cast< T * >( storage);
+}
+
+template< typename T >
 bool
 pull_coroutine< T >::control_block::valid() const noexcept {
-    return nullptr != other && nullptr != other->t && 0 == ( state & static_cast< int >( state_t::complete) );
+    return nullptr != other && 0 == ( state & static_cast< int >( state_t::complete) ) && bvalid;
 }
 
 
@@ -133,9 +162,10 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
          }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
-    except() {
-    // enter coroutine-fn in order to have first value available after ctor returns
-    ctx( nullptr, preserve_fpu);
+    except(),
+    t( nullptr) {
+    // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
+    t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
 }
 
 template< typename T >
@@ -145,7 +175,8 @@ pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T 
     ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
-    except() {
+    except(),
+    t( nullptr) {
 }
 
 template< typename T >
@@ -162,7 +193,7 @@ template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
+    t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -173,9 +204,15 @@ pull_coroutine< T & >::control_block::resume() {
 }
 
 template< typename T >
+T &
+pull_coroutine< T & >::control_block::get() {
+    return * reinterpret_cast< T * >( t);
+}
+
+template< typename T >
 bool
 pull_coroutine< T & >::control_block::valid() const noexcept {
-    return nullptr != other && nullptr != other->t && 0 == ( state & static_cast< int >( state_t::complete) );
+    return nullptr != other && 0 == ( state & static_cast< int >( state_t::complete) ) && nullptr != t;
 }
 
 

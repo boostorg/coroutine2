@@ -27,7 +27,6 @@ struct push_coroutine< T >::control_block {
     bool                                            preserve_fpu;
     int                                             state;
     std::exception_ptr                              except;
-    T                                           *   t;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&, bool);
@@ -53,7 +52,6 @@ struct push_coroutine< T & >::control_block {
     bool                                                preserve_fpu;
     int                                                 state;
     std::exception_ptr                                  except;
-    T                                               *   t;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&, bool);

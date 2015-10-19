@@ -42,7 +42,9 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             pull_coroutine< T > synthesized( & synthesized_cb);
             other = & synthesized_cb;
             // jump back to ctor
-            ctx( nullptr, preserve_fpu);
+            T * t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
+            // set transferred value
+            synthesized_cb.set( t);
             try {
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -60,8 +62,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
          }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
-    except(),
-    t( nullptr) {
+    except() {
     // enter coroutine-fn in order to get other set
     ctx( nullptr, preserve_fpu);
 }
@@ -73,8 +74,7 @@ push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >:
     ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
-    except(),
-    t( nullptr) {
+    except() {
 }
 
 template< typename T >
@@ -89,14 +89,10 @@ push_coroutine< T >::control_block::~control_block() {
 
 template< typename T >
 void
-push_coroutine< T >::control_block::resume( T const& t_) {
-    // store data on this stack
-    // pass an pointer (address of tmp) to other context
-    T tmp( t_);
-    t = & tmp;
+push_coroutine< T >::control_block::resume( T const& t) {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
-    t = nullptr;
+    // pass an pointer to other context
+    ctx( const_cast< T * >( & t), preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -108,14 +104,10 @@ push_coroutine< T >::control_block::resume( T const& t_) {
 
 template< typename T >
 void
-push_coroutine< T >::control_block::resume( T && t_) {
-    // store data on this stack
-    // pass an pointer (address of tmp) to other context
-    T tmp( std::move( t_) );
-    t = & tmp;
+push_coroutine< T >::control_block::resume( T && t) {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
-    t = nullptr;
+    // pass an pointer to other context
+    ctx( std::addressof( t), preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -146,7 +138,9 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             pull_coroutine< T & > synthesized( & synthesized_cb);
             other = & synthesized_cb;
             // jump back to ctor
-            ctx( nullptr, preserve_fpu);
+            T * t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
+            // set transferred value
+            synthesized_cb.t = t;
             try {
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -164,8 +158,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
          }),
     preserve_fpu( preserve_fpu_),
     state( static_cast< int >( state_t::unwind) ),
-    except(),
-    t( nullptr) {
+    except() {
     // enter coroutine-fn in order to get other set
     ctx( nullptr, preserve_fpu);
 }
@@ -177,8 +170,7 @@ push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T 
     ctx( ctx_),
     preserve_fpu( other->preserve_fpu),
     state( 0),
-    except(),
-    t( nullptr) {
+    except() {
 }
 
 template< typename T >
@@ -193,11 +185,10 @@ push_coroutine< T & >::control_block::~control_block() {
 
 template< typename T >
 void
-push_coroutine< T & >::control_block::resume( T & t_) {
-    t = & t_;
+push_coroutine< T & >::control_block::resume( T & t) {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
-    t = nullptr;
+    // pass an pointer to other context
+    ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ), preserve_fpu);
     if ( except) {
         std::rethrow_exception( except);
     }

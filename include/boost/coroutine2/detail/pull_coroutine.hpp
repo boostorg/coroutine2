@@ -66,7 +66,7 @@ public:
 
     bool operator!() const noexcept;
 
-    T get() const noexcept;
+    T get();
 
     class iterator : public std::iterator< std::input_iterator_tag, typename std::remove_reference< T >::type > {
     private:
@@ -126,11 +126,11 @@ public:
         iterator operator++( int) = delete;
 
         reference_t operator*() const {
-            return * c_->cb_->other->t;
+            return c_->cb_->get();
         }
 
         pointer_t operator->() const {
-            return c_->cb_->other->t;
+            return std::addressof( c_->cb_->get() );
         }
     };
 
@@ -179,7 +179,7 @@ public:
 
     bool operator!() const noexcept;
 
-    T & get() const noexcept;
+    T & get();
 
     class iterator : public std::iterator< std::input_iterator_tag, typename std::remove_reference< T >::type > {
     private:
@@ -239,11 +239,11 @@ public:
         iterator operator++( int) = delete;
 
         reference_t operator*() const {
-            return * c_->cb_->other->t;
+            return c_->cb_->get();
         }
 
         pointer_t operator->() const {
-            return c_->cb_->other->t;
+            return std::addressof( c_->cb_->get() );
         }
     };
 
