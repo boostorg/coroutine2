@@ -19,6 +19,7 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/fixedsize_stack.hpp>
+#include <boost/coroutine2/segmented_stack.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -44,7 +45,7 @@ pull_coroutine< T >::has_result_() const {
 template< typename T >
 template< typename Fn >
 pull_coroutine< T >::pull_coroutine( Fn && fn, bool preserve_fpu) :
-    pull_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    pull_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename T >
@@ -106,8 +107,8 @@ pull_coroutine< T >::operator!() const noexcept {
 
 template< typename T >
 T
-pull_coroutine< T >::get() const noexcept {
-    return std::move( * cb_->other->t);
+pull_coroutine< T >::get() {
+    return std::move( cb_->get() );
 }
 
 
@@ -127,7 +128,7 @@ pull_coroutine< T & >::has_result_() const {
 template< typename T >
 template< typename Fn >
 pull_coroutine< T & >::pull_coroutine( Fn && fn, bool preserve_fpu) :
-    pull_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    pull_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename T >
@@ -189,8 +190,8 @@ pull_coroutine< T & >::operator!() const noexcept {
 
 template< typename T >
 T &
-pull_coroutine< T & >::get() const noexcept {
-    return * cb_->other->t;
+pull_coroutine< T & >::get() {
+    return cb_->get();
 }
 
 
@@ -203,7 +204,7 @@ pull_coroutine< void >::pull_coroutine( control_block * cb) :
 
 template< typename Fn >
 pull_coroutine< void >::pull_coroutine( Fn && fn, bool preserve_fpu) :
-    pull_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    pull_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename StackAllocator, typename Fn >

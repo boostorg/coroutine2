@@ -47,11 +47,6 @@ int main() {
 #endif
 
     boost::coroutines2::coroutine< void >::push_type sink(
-#if defined(BOOST_USE_SEGMENTED_STACKS)
-        boost::coroutines2::segmented_stack(),
-#else
-        boost::coroutines2::fixedsize_stack(),
-#endif
         [&]( boost::coroutines2::coroutine< void >::pull_type & source) {
             bar( count);
             source();

@@ -18,6 +18,7 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/fixedsize_stack.hpp>
+#include <boost/coroutine2/segmented_stack.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -37,7 +38,7 @@ push_coroutine< T >::push_coroutine( control_block * cb) :
 template< typename T >
 template< typename Fn >
 push_coroutine< T >::push_coroutine( Fn && fn, bool preserve_fpu) :
-    push_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    push_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename T >
@@ -115,7 +116,7 @@ push_coroutine< T & >::push_coroutine( control_block * cb) :
 template< typename T >
 template< typename Fn >
 push_coroutine< T & >::push_coroutine( Fn && fn, bool preserve_fpu) :
-    push_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    push_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename T >
@@ -185,7 +186,7 @@ push_coroutine< void >::push_coroutine( control_block * cb) :
 
 template< typename Fn >
 push_coroutine< void >::push_coroutine( Fn && fn, bool preserve_fpu) :
-    push_coroutine( fixedsize_stack(), std::forward< Fn >( fn), preserve_fpu) {
+    push_coroutine( default_stack(), std::forward< Fn >( fn), preserve_fpu) {
 }
 
 template< typename StackAllocator, typename Fn >
