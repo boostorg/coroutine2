@@ -33,16 +33,16 @@ namespace detail {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                   Fn && fn_, bool preserve_fpu_) :
-    other( nullptr),
-    ctx( std::allocator_arg, palloc, salloc,
-         [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable -> void {
+                                                   Fn && fn_) :
+    other{ nullptr },
+    ctx{ std::allocator_arg, palloc, salloc,
+         [this,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
             // create synthesized pull_coroutine< T >
-            typename pull_coroutine< T >::control_block synthesized_cb( this, ctx);
-            pull_coroutine< T > synthesized( & synthesized_cb);
+            typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
+            pull_coroutine< T > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
             // jump back to ctor
-            T * t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
+            T * t = static_cast< T * >( ctx() );
             // set transferred value
             synthesized_cb.set( t);
             try {
@@ -55,35 +55,33 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                 except = std::current_exception();
             }
             // set termination flags
-            state |= static_cast< int >( state_t::complete);
+            state |= state_t::complete;
             // jump back to ctx
-            other->ctx( nullptr, preserve_fpu);
+            other->ctx();
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
-         }),
-    preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
+         }},
+    state{ state_t::unwind },
+    except{} {
     // enter coroutine-fn in order to get other set
-    ctx( nullptr, preserve_fpu);
+    ctx();
 }
 
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
-                                                   boost::context::execution_context const& ctx_) :
-    other( cb),
-    ctx( ctx_),
-    preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+                                                   boost::context::execution_context const& ctx_) noexcept :
+    other{ cb },
+    ctx{ ctx_ },
+    state{ state_t::none },
+    except{} {
 }
 
 template< typename T >
-push_coroutine< T >::control_block::~control_block() {
-    if ( 0 == ( state & static_cast< int >( state_t::complete ) ) &&
-         0 != ( state & static_cast< int >( state_t::unwind) ) ) {
+push_coroutine< T >::control_block::~control_block() noexcept {
+    if ( state_t::none == ( state & state_t::complete) &&
+         state_t::none != ( state & state_t::unwind) ) {
         // set early-exit flag
-        state |= static_cast< int >( state_t::early_exit);
-        ctx( nullptr, preserve_fpu);
+        state |= state_t::early_exit;
+        ctx();
     }
 }
 
@@ -92,12 +90,12 @@ void
 push_coroutine< T >::control_block::resume( T const& t) {
     other->ctx = boost::context::execution_context::current();
     // pass an pointer to other context
-    ctx( const_cast< T * >( & t), preserve_fpu);
+    ctx( const_cast< T * >( & t) );
     if ( except) {
         std::rethrow_exception( except);
     }
     // test early-exit-flag
-    if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
+    if ( state_t::none != ( other->state & state_t::early_exit) ) {
         throw forced_unwind();
     }
 }
@@ -107,12 +105,12 @@ void
 push_coroutine< T >::control_block::resume( T && t) {
     other->ctx = boost::context::execution_context::current();
     // pass an pointer to other context
-    ctx( std::addressof( t), preserve_fpu);
+    ctx( std::addressof( t) );
     if ( except) {
         std::rethrow_exception( except);
     }
     // test early-exit-flag
-    if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
+    if ( state_t::none != ( other->state & state_t::early_exit) ) {
         throw forced_unwind();
     }
 }
@@ -120,7 +118,7 @@ push_coroutine< T >::control_block::resume( T && t) {
 template< typename T >
 bool
 push_coroutine< T >::control_block::valid() const noexcept {
-    return 0 == ( state & static_cast< int >( state_t::complete) );
+    return state_t::none == ( state & state_t::complete );
 }
 
 
@@ -129,16 +127,16 @@ push_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
-                                                     Fn && fn_, bool preserve_fpu_) :
-    other( nullptr),
-    ctx( std::allocator_arg, palloc, salloc,
-         [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable -> void {
+                                                     Fn && fn_) :
+    other{ nullptr },
+    ctx{ std::allocator_arg, palloc, salloc,
+         [this,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
             // create synthesized pull_coroutine< T >
-            typename pull_coroutine< T & >::control_block synthesized_cb( this, ctx);
-            pull_coroutine< T & > synthesized( & synthesized_cb);
+            typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
+            pull_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
             // jump back to ctor
-            T * t = reinterpret_cast< T * >( ctx( nullptr, preserve_fpu) );
+            T * t = static_cast< T * >( ctx() );
             // set transferred value
             synthesized_cb.t = t;
             try {
@@ -151,35 +149,33 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                 except = std::current_exception();
             }
             // set termination flags
-            state |= static_cast< int >( state_t::complete);
+            state |= state_t::complete;
             // jump back to ctx
-            other->ctx( nullptr, preserve_fpu);
+            other->ctx();
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
-         }),
-    preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
+         }},
+    state{ state_t::unwind },
+    except{} {
     // enter coroutine-fn in order to get other set
-    ctx( nullptr, preserve_fpu);
+    ctx();
 }
 
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
-                                                     boost::context::execution_context const& ctx_) :
-    other( cb),
-    ctx( ctx_),
-    preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+                                                     boost::context::execution_context const& ctx_) noexcept :
+    other{ cb },
+    ctx{ ctx_ },
+    state{ state_t::none },
+    except{} {
 }
 
 template< typename T >
-push_coroutine< T & >::control_block::~control_block() {
-    if ( 0 == ( state & static_cast< int >( state_t::complete ) ) &&
-         0 != ( state & static_cast< int >( state_t::unwind) ) ) {
+push_coroutine< T & >::control_block::~control_block() noexcept {
+    if ( state_t::none == ( state & state_t::complete) &&
+         state_t::none != ( state & state_t::unwind) ) {
         // set early-exit flag
-        state |= static_cast< int >( state_t::early_exit);
-        ctx( nullptr, preserve_fpu);
+        state |= state_t::early_exit;
+        ctx();
     }
 }
 
@@ -188,12 +184,12 @@ void
 push_coroutine< T & >::control_block::resume( T & t) {
     other->ctx = boost::context::execution_context::current();
     // pass an pointer to other context
-    ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ), preserve_fpu);
+    ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ) );
     if ( except) {
         std::rethrow_exception( except);
     }
     // test early-exit-flag
-    if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
+    if ( state_t::none != ( other->state & state_t::early_exit) ) {
         throw forced_unwind();
     }
 }
@@ -201,23 +197,23 @@ push_coroutine< T & >::control_block::resume( T & t) {
 template< typename T >
 bool
 push_coroutine< T & >::control_block::valid() const noexcept {
-    return 0 == ( state & static_cast< int >( state_t::complete) );
+    return state_t::none == ( state & state_t::complete );
 }
 
 
 // push_coroutine< void >
 
 template< typename StackAllocator, typename Fn >
-push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn_, bool preserve_fpu_) :
-    other( nullptr),
-    ctx( std::allocator_arg, palloc, salloc,
-         [=,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable -> void {
+push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn_) :
+    other{ nullptr },
+    ctx{ std::allocator_arg, palloc, salloc,
+         [this,fn=std::forward< Fn >( fn_),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
             // create synthesized pull_coroutine< T >
-            typename pull_coroutine< void >::control_block synthesized_cb( this, ctx);
-            pull_coroutine< void > synthesized( & synthesized_cb);
+            typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
+            pull_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
             // jump back to ctor
-            ctx( nullptr, preserve_fpu);
+            ctx();
             try {
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -228,35 +224,33 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                 except = std::current_exception();
             }
             // set termination flags
-            state |= static_cast< int >( state_t::complete);
+            state |= state_t::complete;
             // jump back to ctx
-            other->ctx( nullptr, preserve_fpu);
+            other->ctx();
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
-         }),
-    preserve_fpu( preserve_fpu_),
-    state( static_cast< int >( state_t::unwind) ),
-    except() {
+         }},
+    state{ state_t::unwind },
+    except{} {
     // enter coroutine-fn in order to get other set
-    ctx( nullptr, preserve_fpu);
+    ctx();
 }
 
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
-                                                      boost::context::execution_context const& ctx_) :
-    other( cb),
-    ctx( ctx_),
-    preserve_fpu( other->preserve_fpu),
-    state( 0),
-    except() {
+                                                      boost::context::execution_context const& ctx_) noexcept :
+    other{ cb },
+    ctx{ ctx_ },
+    state{ state_t::none },
+    except{} {
 }
 
 inline
-push_coroutine< void >::control_block::~control_block() {
-    if ( 0 == ( state & static_cast< int >( state_t::complete ) ) &&
-         0 != ( state & static_cast< int >( state_t::unwind) ) ) {
+push_coroutine< void >::control_block::~control_block() noexcept {
+    if ( state_t::none == ( state & state_t::complete) &&
+         state_t::none != ( state & state_t::unwind) ) {
         // set early-exit flag
-        state |= static_cast< int >( state_t::early_exit);
-        ctx( nullptr, preserve_fpu);
+        state |= state_t::early_exit;
+        ctx();
     }
 }
 
@@ -264,12 +258,12 @@ inline
 void
 push_coroutine< void >::control_block::resume() {
     other->ctx = boost::context::execution_context::current();
-    ctx( nullptr, preserve_fpu);
+    ctx();
     if ( except) {
         std::rethrow_exception( except);
     }
     // test early-exit-flag
-    if ( 0 != ( ( other->state) & static_cast< int >( state_t::early_exit) ) ) {
+    if ( state_t::none != ( other->state & state_t::early_exit) ) {
         throw forced_unwind();
     }
 }
@@ -277,7 +271,7 @@ push_coroutine< void >::control_block::resume() {
 inline
 bool
 push_coroutine< void >::control_block::valid() const noexcept {
-    return 0 == ( state & static_cast< int >( state_t::complete) );
+    return state_t::none == ( state & state_t::complete );
 }
 
 }}}

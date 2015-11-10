@@ -9,15 +9,12 @@
 
 #include <boost/coroutine2/all.hpp>
 
-int main()
-{
+int main() {
     boost::coroutines2::coroutine< void >::push_type sink(
-        [&]( boost::coroutines2::coroutine< void >::pull_type & source) {
+        []( boost::coroutines2::coroutine< void >::pull_type & source) {
             std::cout << "inside coroutine-fn" << std::endl;
         });
     sink();
-
     std::cout << "Done" << std::endl;
-
     return EXIT_SUCCESS;
 }
