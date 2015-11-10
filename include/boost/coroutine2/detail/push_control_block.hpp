@@ -12,6 +12,8 @@
 #include <boost/config.hpp>
 #include <boost/context/execution_context.hpp>
 
+#include <boost/coroutine2/detail/state.hpp>
+
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
 #endif
@@ -24,16 +26,15 @@ template< typename T >
 struct push_coroutine< T >::control_block {
     typename pull_coroutine< T >::control_block *   other;
     boost::context::execution_context               ctx;
-    bool                                            preserve_fpu;
-    int                                             state;
+    state_t                                         state;
     std::exception_ptr                              except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, Fn &&, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&);
 
-    explicit control_block( typename pull_coroutine< T >::control_block *, boost::context::execution_context const&);
+    control_block( typename pull_coroutine< T >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block();
+    ~control_block() noexcept;
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
@@ -49,16 +50,15 @@ template< typename T >
 struct push_coroutine< T & >::control_block {
     typename pull_coroutine< T & >::control_block   *   other;
     boost::context::execution_context                   ctx;
-    bool                                                preserve_fpu;
-    int                                                 state;
+    state_t                                             state;
     std::exception_ptr                                  except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, Fn &&, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&);
 
-    explicit control_block( typename pull_coroutine< T & >::control_block *, boost::context::execution_context const&);
+    control_block( typename pull_coroutine< T & >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block();
+    ~control_block() noexcept;
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
@@ -71,16 +71,15 @@ struct push_coroutine< T & >::control_block {
 struct push_coroutine< void >::control_block {
     pull_coroutine< void >::control_block  *    other;
     boost::context::execution_context           ctx;
-    bool                                        preserve_fpu;
-    int                                         state;
+    state_t                                     state;
     std::exception_ptr                          except;
 
     template< typename StackAllocator, typename Fn >
-    control_block( context::preallocated, StackAllocator, Fn &&, bool);
+    control_block( context::preallocated, StackAllocator, Fn &&);
 
-    explicit control_block( pull_coroutine< void >::control_block *, boost::context::execution_context const&);
+    control_block( pull_coroutine< void >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block();
+    ~control_block() noexcept;
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;

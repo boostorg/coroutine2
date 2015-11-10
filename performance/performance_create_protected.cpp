@@ -20,7 +20,6 @@
 typedef boost::coroutines2::protected_fixedsize_stack   stack_allocator;
 typedef boost::coroutines2::coroutine< void >           coro_type;
 
-bool preserve = false;
 boost::uint64_t jobs = 1000;
 
 void fn( coro_type::pull_type & c)
@@ -32,7 +31,7 @@ duration_type measure_time( duration_type overhead)
 
     time_point_type start( clock_type::now() );
     for ( std::size_t i = 0; i < jobs; ++i) {
-        coro_type::push_type c( stack_alloc, fn, preserve);
+        coro_type::push_type c( stack_alloc, fn);
     }
     duration_type total = clock_type::now() - start;
     total -= overhead_clock(); // overhead of measurement
@@ -48,7 +47,7 @@ cycle_type measure_cycles( cycle_type overhead)
 
     cycle_type start( cycles() );
     for ( std::size_t i = 0; i < jobs; ++i) {
-        coro_type::push_type c( stack_alloc, fn, preserve);
+        coro_type::push_type c( stack_alloc, fn);
     }
     cycle_type total = cycles() - start;
     total -= overhead; // overhead of measurement
@@ -67,7 +66,6 @@ int main( int argc, char * argv[])
         desc.add_options()
             ("help", "help message")
             ("bind,b", boost::program_options::value< bool >( & bind), "bind thread to CPU")
-            ("fpu,f", boost::program_options::value< bool >( & preserve), "preserve FPU registers")
             ("jobs,j", boost::program_options::value< boost::uint64_t >( & jobs), "jobs to run");
 
         boost::program_options::variables_map vm;
