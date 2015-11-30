@@ -160,7 +160,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
          }},
     state{ state_t::unwind },
     except{},
-    t( nullptr) {
+    t{ nullptr } {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
     t = static_cast< T * >( ctx() );
 }

@@ -64,7 +64,7 @@ pull_coroutine< T >::~pull_coroutine() noexcept {
 
 template< typename T >
 pull_coroutine< T >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 
@@ -97,7 +97,7 @@ pull_coroutine< T >::get() noexcept {
 
 template< typename T >
 pull_coroutine< T & >::pull_coroutine( control_block * cb) noexcept :
-    cb_( cb) {
+    cb_{ cb } {
 }
 
 template< typename T >
@@ -131,7 +131,7 @@ pull_coroutine< T & >::~pull_coroutine() noexcept {
 
 template< typename T >
 pull_coroutine< T & >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 
@@ -164,7 +164,7 @@ pull_coroutine< T & >::get() noexcept {
 
 inline
 pull_coroutine< void >::pull_coroutine( control_block * cb) noexcept :
-    cb_( cb) {
+    cb_{ cb } {
 }
 
 template< typename Fn >
@@ -190,7 +190,7 @@ pull_coroutine< void >::~pull_coroutine() noexcept {
 
 inline
 pull_coroutine< void >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 

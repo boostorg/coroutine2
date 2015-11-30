@@ -52,10 +52,9 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
@@ -69,9 +68,9 @@ public:
 
     class iterator : public std::iterator< std::input_iterator_tag, typename std::remove_reference< T >::type > {
     private:
-        pull_coroutine< T > *   c_;
+        pull_coroutine< T > *   c_{ nullptr };
 
-        void fetch_() {
+        void fetch_() noexcept {
             BOOST_ASSERT( nullptr != c_);
             if ( ! ( * c_) ) {
                 c_ = nullptr;
@@ -90,11 +89,9 @@ public:
         typedef typename iterator::pointer pointer_t;
         typedef typename iterator::reference reference_t;
 
-        iterator() noexcept :
-            c_{ nullptr } {
-        }
+        constexpr iterator() noexcept = default;
 
-        explicit iterator( pull_coroutine< T > * c) :
+        explicit iterator( pull_coroutine< T > * c) noexcept :
             c_{ c } {
             fetch_();
         }
@@ -104,9 +101,8 @@ public:
         }
 
         iterator & operator=( iterator const& other) noexcept {
-            if ( this != & other) {
-                c_ = other.c_;
-            }
+            if ( this == & other) return * this;
+            c_ = other.c_;
             return * this;
         }
 
@@ -166,10 +162,9 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
@@ -183,9 +178,9 @@ public:
 
     class iterator : public std::iterator< std::input_iterator_tag, typename std::remove_reference< T >::type > {
     private:
-        pull_coroutine< T & > *   c_;
+        pull_coroutine< T & > *   c_{ nullptr };
 
-        void fetch_() {
+        void fetch_() noexcept {
             BOOST_ASSERT( nullptr != c_);
             if ( ! ( * c_) ) {
                 c_ = nullptr;
@@ -204,11 +199,9 @@ public:
         typedef typename iterator::pointer pointer_t;
         typedef typename iterator::reference reference_t;
 
-        iterator() noexcept :
-            c_{ nullptr } {
-        }
+        constexpr iterator() noexcept = default;
 
-        explicit iterator( pull_coroutine< T & > * c) :
+        explicit iterator( pull_coroutine< T & > * c) noexcept :
             c_{ c } {
             fetch_();
         }
@@ -218,9 +211,8 @@ public:
         }
 
         iterator & operator=( iterator const& other) noexcept {
-            if ( this != & other) {
-                c_ = other.c_;
-            }
+            if ( this == & other) return * this;
+            c_ = other.c_;
             return * this;
         }
 
@@ -278,10 +270,9 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
