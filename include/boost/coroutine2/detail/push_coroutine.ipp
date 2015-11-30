@@ -53,7 +53,7 @@ push_coroutine< T >::~push_coroutine() noexcept {
 
 template< typename T >
 push_coroutine< T >::push_coroutine( push_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 
@@ -111,7 +111,7 @@ push_coroutine< T & >::~push_coroutine() noexcept {
 
 template< typename T >
 push_coroutine< T & >::push_coroutine( push_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 
@@ -160,7 +160,7 @@ push_coroutine< void >::~push_coroutine() noexcept {
 
 inline
 push_coroutine< void >::push_coroutine( push_coroutine && other) noexcept :
-    cb_( other.cb_) {
+    cb_{ other.cb_ } {
     other.cb_ = nullptr;
 }
 

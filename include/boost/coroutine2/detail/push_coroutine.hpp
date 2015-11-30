@@ -50,10 +50,9 @@ public:
     push_coroutine( push_coroutine &&) noexcept;
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
@@ -67,12 +66,10 @@ public:
 
     class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void > {
     private:
-        push_coroutine< T > *   c_;
+        push_coroutine< T > *   c_{ nullptr };
 
     public:
-        iterator() noexcept :
-            c_{ nullptr } {
-        }
+        constexpr iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T > * c) noexcept :
             c_{ c } {
@@ -131,10 +128,9 @@ public:
     push_coroutine( push_coroutine &&) noexcept;
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
@@ -146,12 +142,10 @@ public:
 
     class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void > {
     private:
-        push_coroutine< T & >   *   c_;
+        push_coroutine< T & >   *   c_{ nullptr };
 
     public:
-        iterator() noexcept :
-            c_{ nullptr } {
-        }
+        constexpr iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T & > * c) noexcept :
             c_{ c } {
@@ -210,10 +204,9 @@ public:
     push_coroutine( push_coroutine &&) noexcept;
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
-        if ( this != & other) {
-            cb_ = other.cb_;
-            other.cb_ = nullptr;
-        }
+        if ( this == & other) return * this;
+        cb_ = other.cb_;
+        other.cb_ = nullptr;
         return * this;
     }
 
