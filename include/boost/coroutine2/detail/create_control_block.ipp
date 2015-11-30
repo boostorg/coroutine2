@@ -33,7 +33,7 @@ ControlBlock * create_control_block( StackAllocator salloc, Fn && fn) {
     // reserve space for control structure
 #if defined(BOOST_NO_CXX14_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
     void * sp = static_cast< char * >( sctx.sp) - sizeof( ControlBlock);
-    std::size_t size = sctx.size - sizeof( ControlBlock);
+    const std::size_t size = sctx.size - sizeof( ControlBlock);
 #else
     constexpr std::size_t func_alignment = 64; // alignof( ControlBlock);
     constexpr std::size_t func_size = sizeof( ControlBlock);
@@ -44,7 +44,7 @@ ControlBlock * create_control_block( StackAllocator salloc, Fn && fn) {
     sp = std::align( func_alignment, func_size, sp, space);
     BOOST_ASSERT( nullptr != sp);
     // calculate remaining size
-    std::size_t size = sctx.size - ( static_cast< char * >( sctx.sp) - static_cast< char * >( sp) );
+    const std::size_t size = sctx.size - ( static_cast< char * >( sctx.sp) - static_cast< char * >( sp) );
 #endif
     // placment new for control structure on coroutine stack
     return new ( sp) ControlBlock{ context::preallocated( sp, size, sctx),
