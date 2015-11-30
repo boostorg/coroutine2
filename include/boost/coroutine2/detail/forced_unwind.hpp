@@ -24,12 +24,6 @@ namespace detail {
 
 struct forced_unwind {};
 
-inline
-void * unwind_coroutine( void * data) {
-    throw forced_unwind{};
-    return data;
-}
-
 }}}
 
 #ifdef BOOST_HAS_ABI_HEADERS
