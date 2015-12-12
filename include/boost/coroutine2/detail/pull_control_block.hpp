@@ -8,6 +8,7 @@
 #define BOOST_COROUTINES2_DETAIL_PULL_CONTROL_BLOCK_HPP
 
 #include <exception>
+#include <functional>
 #include <type_traits>
 
 #include <boost/config.hpp>
@@ -30,7 +31,7 @@ struct pull_coroutine< T >::control_block {
     state_t                                                         state;
     std::exception_ptr                                              except;
     bool                                                            bvalid;
-    typename std::aligned_storage< sizeof( T), alignof( T) >::type  storage[1];
+    typename std::aligned_storage< sizeof( T), alignof( T) >::type  storage;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&);

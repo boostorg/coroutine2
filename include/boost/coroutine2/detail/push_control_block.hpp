@@ -7,6 +7,7 @@
 #ifndef BOOST_COROUTINES2_DETAIL_PUSH_CONTROL_BLOCK_HPP
 #define BOOST_COROUTINES2_DETAIL_PUSH_CONTROL_BLOCK_HPP
 
+#include <functional>
 #include <exception>
 
 #include <boost/config.hpp>
