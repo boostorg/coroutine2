@@ -193,10 +193,6 @@ void f12( coro::coroutine< void >::pull_type & c)
     c();
 }
 
-template< typename E >
-void f14( coro::coroutine< void >::pull_type &, E const& e)
-{ throw e; }
-
 void f16( coro::coroutine< int >::push_type & c)
 {
     c( 1);
@@ -214,13 +210,6 @@ void f17( coro::coroutine< int >::pull_type & c, std::vector< int > & vec)
         vec.push_back( x);
         x = c().get();
     }
-}
-
-void f19( coro::coroutine< int& >::push_type & c, int & i1, int & i2, int & i3)
-{
-    c( i1);
-    c( i2);
-    c( i3);
 }
 
 void f20( coro::coroutine< int >::push_type &)
@@ -426,6 +415,12 @@ void test_const_ref()
     BOOST_CHECK_EQUAL( & a, value5);
 }
 
+void test_no_result()
+{
+    coro::coroutine< int >::pull_type coro( f20);
+    BOOST_CHECK( ! coro);
+}
+
 void test_tuple()
 {
     value8 = 0;
@@ -466,7 +461,9 @@ void test_exceptions()
     try
     {
         coro::coroutine< void >::push_type coro(
-            std::bind( f14< std::runtime_error >, std::placeholders::_1, ex) );
+                [&msg]( coro::coroutine< void >::pull_type &) {
+                    throw std::runtime_error( msg);
+                });
         BOOST_CHECK( coro);
         coro();
         BOOST_CHECK( ! coro);
@@ -512,7 +509,12 @@ void test_input_iterator()
     {
         int i1 = 1, i2 = 2, i3 = 3;
         coro::coroutine< int& >::pull_type coro(
-            std::bind( f19, std::placeholders::_1, std::ref( i1), std::ref( i2), std::ref( i3) ) );
+            [&i1,&i2,&i3](coro::coroutine< int& >::push_type & c){
+                c( i1);
+                c( i2);
+                c( i3);
+            });
+
         int counter = 1;
         for ( int & i : coro) {
             switch ( counter) {
@@ -562,12 +564,6 @@ void test_output_iterator()
     BOOST_CHECK_EQUAL( ( int)2, vec[1] );
     BOOST_CHECK_EQUAL( ( int)3, vec[2] );
     BOOST_CHECK_EQUAL( ( int)4, vec[3] );
-}
-
-void test_no_result()
-{
-    coro::coroutine< int >::pull_type coro( f20);
-    BOOST_CHECK( ! coro);
 }
 
 std::vector< int > vec;
