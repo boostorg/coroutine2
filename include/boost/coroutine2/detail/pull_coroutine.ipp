@@ -15,6 +15,7 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/create_control_block.ipp>
+#include <boost/coroutine2/detail/disable_overload.hpp>
 #include <boost/coroutine2/fixedsize_stack.hpp>
 #include <boost/coroutine2/segmented_stack.hpp>
 
@@ -40,7 +41,9 @@ pull_coroutine< T >::has_result_() const noexcept {
 }
 
 template< typename T >
-template< typename Fn >
+template< typename Fn,
+          typename
+>
 pull_coroutine< T >::pull_coroutine( Fn && fn) :
     pull_coroutine{ default_stack(), std::forward< Fn >( fn) } {
 }
@@ -107,7 +110,9 @@ pull_coroutine< T & >::has_result_() const noexcept {
 }
 
 template< typename T >
-template< typename Fn >
+template< typename Fn,
+          typename
+>
 pull_coroutine< T & >::pull_coroutine( Fn && fn) :
     pull_coroutine{ default_stack(), std::forward< Fn >( fn) } {
 }
@@ -167,7 +172,9 @@ pull_coroutine< void >::pull_coroutine( control_block * cb) noexcept :
     cb_{ cb } {
 }
 
-template< typename Fn >
+template< typename Fn,
+          typename
+>
 pull_coroutine< void >::pull_coroutine( Fn && fn) :
     pull_coroutine{ default_stack(), std::forward< Fn >( fn) } {
 }
