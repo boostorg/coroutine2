@@ -14,6 +14,7 @@
 #include <boost/config.hpp>
 
 #include <boost/coroutine2/detail/config.hpp>
+#include <boost/coroutine2/detail/disable_overload.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -36,7 +37,9 @@ private:
     explicit push_coroutine( control_block *) noexcept;
 
 public:
-    template< typename Fn >
+    template< typename Fn,
+              typename = detail::disable_overload< push_coroutine, Fn >
+    >
     explicit push_coroutine( Fn &&);
 
     template< typename StackAllocator, typename Fn >
@@ -114,7 +117,9 @@ private:
     explicit push_coroutine( control_block *) noexcept;
 
 public:
-    template< typename Fn >
+    template< typename Fn,
+              typename = detail::disable_overload< push_coroutine, Fn >
+    >
     explicit push_coroutine( Fn &&);
 
     template< typename StackAllocator, typename Fn >
@@ -190,7 +195,9 @@ private:
     explicit push_coroutine( control_block *) noexcept;
 
 public:
-    template< typename Fn >
+    template< typename Fn,
+              typename = detail::disable_overload< push_coroutine, Fn >
+    >
     explicit push_coroutine( Fn &&);
 
     template< typename StackAllocator, typename Fn >
