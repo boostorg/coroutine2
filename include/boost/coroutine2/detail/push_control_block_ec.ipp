@@ -116,9 +116,8 @@ template< typename T >
 push_coroutine< T >::control_block::~control_block() noexcept {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
     }
 }
 
@@ -131,10 +130,6 @@ push_coroutine< T >::control_block::resume( T const& t) {
     if ( except) {
         std::rethrow_exception( except);
     }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
-    }
 }
 
 template< typename T >
@@ -145,10 +140,6 @@ push_coroutine< T >::control_block::resume( T && t) {
     ctx( std::addressof( t) );
     if ( except) {
         std::rethrow_exception( except);
-    }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
     }
 }
 
@@ -245,9 +236,8 @@ template< typename T >
 push_coroutine< T & >::control_block::~control_block() noexcept {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
     }
 }
 
@@ -259,10 +249,6 @@ push_coroutine< T & >::control_block::resume( T & t) {
     ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ) );
     if ( except) {
         std::rethrow_exception( except);
-    }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
     }
 }
 
@@ -354,9 +340,8 @@ inline
 push_coroutine< void >::control_block::~control_block() noexcept {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
     }
 }
 
@@ -367,10 +352,6 @@ push_coroutine< void >::control_block::resume() {
     ctx();
     if ( except) {
         std::rethrow_exception( except);
-    }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
     }
 }
 

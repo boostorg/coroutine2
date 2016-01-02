@@ -25,8 +25,7 @@ namespace detail {
 enum class state_t : unsigned int {
     none       = 0,
     complete   = 1 << 1,
-    unwind     = 1 << 2,
-    early_exit = 1 << 3
+    unwind     = 1 << 2
 };
 
 

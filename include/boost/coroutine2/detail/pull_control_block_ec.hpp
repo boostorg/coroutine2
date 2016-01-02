@@ -38,7 +38,7 @@ struct pull_coroutine< T >::control_block {
 
     control_block( typename push_coroutine< T >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block() noexcept;
+    ~control_block();
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
@@ -65,7 +65,7 @@ struct pull_coroutine< T & >::control_block {
 
     control_block( typename push_coroutine< T & >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block() noexcept;
+    ~control_block();
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
@@ -88,7 +88,7 @@ struct pull_coroutine< void >::control_block {
 
     control_block( push_coroutine< void >::control_block *, boost::context::execution_context const&) noexcept;
 
-    ~control_block() noexcept;
+    ~control_block();
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
