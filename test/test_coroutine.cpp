@@ -613,7 +613,7 @@ void test_chaining()
 boost::unit_test::test_suite * init_unit_test_suite( int, char* [])
 {
     boost::unit_test::test_suite * test =
-        BOOST_TEST_SUITE("Boost.coroutine: coroutine test suite");
+        BOOST_TEST_SUITE("Boost.Coroutine2: coroutine test suite");
 
     test->add( BOOST_TEST_CASE( & test_move) );
     test->add( BOOST_TEST_CASE( & test_complete) );
