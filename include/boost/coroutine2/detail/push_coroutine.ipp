@@ -50,7 +50,7 @@ push_coroutine< T >::push_coroutine( StackAllocator salloc, Fn && fn) :
 template< typename T >
 push_coroutine< T >::~push_coroutine() noexcept {
     if ( nullptr != cb_) {
-        cb_->~control_block();
+        cb_->deallocate();
     }
 }
 
@@ -110,7 +110,7 @@ push_coroutine< T & >::push_coroutine( StackAllocator salloc, Fn && fn) :
 template< typename T >
 push_coroutine< T & >::~push_coroutine() noexcept {
     if ( nullptr != cb_) {
-        cb_->~control_block();
+        cb_->deallocate();
     }
 }
 
@@ -161,7 +161,7 @@ push_coroutine< void >::push_coroutine( StackAllocator salloc, Fn && fn) :
 inline
 push_coroutine< void >::~push_coroutine() noexcept {
     if ( nullptr != cb_) {
-        cb_->~control_block();
+        cb_->deallocate();
     }
 }
 

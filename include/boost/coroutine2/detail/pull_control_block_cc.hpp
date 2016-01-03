@@ -25,12 +25,14 @@ namespace detail {
 
 template< typename T >
 struct pull_coroutine< T >::control_block {
-    typename push_coroutine< T >::control_block                 *   other;
     boost::context::captured_context                                ctx;
+    typename push_coroutine< T >::control_block                 *   other;
     state_t                                                         state;
     std::exception_ptr                                              except;
     bool                                                            bvalid;
     typename std::aligned_storage< sizeof( T), alignof( T) >::type  storage;
+
+    static void destroy( control_block * cb) noexcept;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&);
@@ -41,6 +43,8 @@ struct pull_coroutine< T >::control_block {
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
+
+    void deallocate() noexcept;
 
     void resume();
 
@@ -53,21 +57,23 @@ struct pull_coroutine< T >::control_block {
 
 template< typename T >
 struct pull_coroutine< T & >::control_block {
-    typename push_coroutine< T & >::control_block   *   other;
     boost::context::captured_context                    ctx;
+    typename push_coroutine< T & >::control_block   *   other;
     state_t                                             state;
     std::exception_ptr                                  except;
     T                                               *   t;
+
+    static void destroy( control_block * cb) noexcept;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&);
 
     control_block( typename push_coroutine< T & >::control_block *, boost::context::captured_context &) noexcept;
 
-    ~control_block();
-
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
+
+    void deallocate() noexcept;
 
     void resume();
 
@@ -77,20 +83,22 @@ struct pull_coroutine< T & >::control_block {
 };
 
 struct pull_coroutine< void >::control_block {
-    push_coroutine< void >::control_block  *    other;
     boost::context::captured_context            ctx;
+    push_coroutine< void >::control_block  *    other;
     state_t                                     state;
     std::exception_ptr                          except;
+
+    static void destroy( control_block * cb) noexcept;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&);
 
     control_block( push_coroutine< void >::control_block *, boost::context::captured_context &) noexcept;
 
-    ~control_block();
-
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
+
+    void deallocate() noexcept;
 
     void resume();
 

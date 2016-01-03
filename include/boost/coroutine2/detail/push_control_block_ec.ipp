@@ -33,10 +33,17 @@ namespace detail {
 // push_coroutine< T >
 
 template< typename T >
+void
+push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
+template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                    Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -97,6 +104,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -106,18 +114,26 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
                                                    boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 template< typename T >
-push_coroutine< T >::control_block::~control_block() noexcept {
+push_coroutine< T >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
         ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+template< typename T >
+void
+push_coroutine< T >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
@@ -153,10 +169,17 @@ push_coroutine< T >::control_block::valid() const noexcept {
 // push_coroutine< T & >
 
 template< typename T >
+void
+push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
+template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                      Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -217,6 +240,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -226,18 +250,26 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
                                                      boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 template< typename T >
-push_coroutine< T & >::control_block::~control_block() noexcept {
+push_coroutine< T & >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
         ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+template< typename T >
+void
+push_coroutine< T & >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
@@ -261,9 +293,16 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 
 // push_coroutine< void >
 
+inline
+void
+push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
 template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -321,6 +360,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -330,18 +370,26 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
                                                       boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 inline
-push_coroutine< void >::control_block::~control_block() noexcept {
+push_coroutine< void >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
         ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+inline
+void
+push_coroutine< void >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
