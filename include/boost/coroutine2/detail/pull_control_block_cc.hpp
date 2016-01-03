@@ -13,6 +13,7 @@
 #include <boost/config.hpp>
 #include <boost/context/captured_context.hpp>
 
+#include <boost/coroutine2/detail/state.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -26,6 +27,7 @@ template< typename T >
 struct pull_coroutine< T >::control_block {
     typename push_coroutine< T >::control_block                 *   other;
     boost::context::captured_context                                ctx;
+    state_t                                                         state;
     std::exception_ptr                                              except;
     bool                                                            bvalid;
     typename std::aligned_storage< sizeof( T), alignof( T) >::type  storage;
@@ -53,6 +55,7 @@ template< typename T >
 struct pull_coroutine< T & >::control_block {
     typename push_coroutine< T & >::control_block   *   other;
     boost::context::captured_context                    ctx;
+    state_t                                             state;
     std::exception_ptr                                  except;
     T                                               *   t;
 
@@ -60,6 +63,8 @@ struct pull_coroutine< T & >::control_block {
     control_block( context::preallocated, StackAllocator, Fn &&);
 
     control_block( typename push_coroutine< T & >::control_block *, boost::context::captured_context &) noexcept;
+
+    ~control_block();
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;
@@ -74,12 +79,15 @@ struct pull_coroutine< T & >::control_block {
 struct pull_coroutine< void >::control_block {
     push_coroutine< void >::control_block  *    other;
     boost::context::captured_context            ctx;
+    state_t                                     state;
     std::exception_ptr                          except;
 
     template< typename StackAllocator, typename Fn >
     control_block( context::preallocated, StackAllocator, Fn &&);
 
     control_block( push_coroutine< void >::control_block *, boost::context::captured_context &) noexcept;
+
+    ~control_block();
 
     control_block( control_block &) = delete;
     control_block & operator=( control_block &) = delete;

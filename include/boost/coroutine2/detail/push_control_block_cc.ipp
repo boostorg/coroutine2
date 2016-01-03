@@ -55,7 +55,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -80,10 +84,15 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{} {
 }
 
@@ -92,7 +101,16 @@ push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >:
                                                    boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{} {
+}
+
+template< typename T >
+push_coroutine< T >::control_block::~control_block() {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
+    }
 }
 
 template< typename T >
@@ -120,7 +138,7 @@ push_coroutine< T >::control_block::resume( T && data) {
 template< typename T >
 bool
 push_coroutine< T >::control_block::valid() const noexcept {
-    return ctx ? true : false;
+    return state_t::none == ( state & state_t::complete );
 }
 
 
@@ -152,7 +170,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -177,10 +199,15 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{} {
 }
 
@@ -189,7 +216,16 @@ push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T 
                                                      boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{} {
+}
+
+template< typename T >
+push_coroutine< T & >::control_block::~control_block() {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
+    }
 }
 
 template< typename T >
@@ -206,7 +242,7 @@ push_coroutine< T & >::control_block::resume( T & t) {
 template< typename T >
 bool
 push_coroutine< T & >::control_block::valid() const noexcept {
-    return ctx ? true : false;
+    return state_t::none == ( state & state_t::complete );
 }
 
 
@@ -234,7 +270,11 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -257,10 +297,15 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{} {
 }
 
@@ -269,7 +314,16 @@ push_coroutine< void >::control_block::control_block( pull_coroutine< void >::co
                                                       boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{} {
+}
+
+inline
+push_coroutine< void >::control_block::~control_block() {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
+    }
 }
 
 inline
@@ -285,7 +339,7 @@ push_coroutine< void >::control_block::resume() {
 inline
 bool
 push_coroutine< void >::control_block::valid() const noexcept {
-    return ctx ? true : false;
+    return state_t::none == ( state & state_t::complete );
 }
 
 }}}

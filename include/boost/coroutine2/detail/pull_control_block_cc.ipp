@@ -54,7 +54,11 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -77,10 +81,15 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{},
     bvalid{ false },
     storage{} {
@@ -95,6 +104,7 @@ pull_coroutine< T >::control_block::control_block( typename push_coroutine< T >:
                                                    boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{},
     bvalid{ false },
     storage{} {
@@ -105,6 +115,10 @@ pull_coroutine< T >::control_block::~control_block() {
     // destroy data if set
     if ( bvalid) {
         reinterpret_cast< T * >( std::addressof( storage) )->~T();
+    }
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
     }
 }
 
@@ -143,7 +157,7 @@ pull_coroutine< T >::control_block::get() noexcept {
 template< typename T >
 bool
 pull_coroutine< T >::control_block::valid() const noexcept {
-    return nullptr != other && ctx && bvalid;
+    return nullptr != other && state_t::none == ( state & state_t::complete) && bvalid;
 }
 
 
@@ -173,7 +187,11 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -196,10 +214,15 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{},
     t{ nullptr } {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
@@ -213,8 +236,17 @@ pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T 
                                                      boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{},
     t{ nullptr } {
+}
+
+template< typename T >
+pull_coroutine< T & >::control_block::~control_block() {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
+    }
 }
 
 template< typename T >
@@ -237,7 +269,7 @@ pull_coroutine< T & >::control_block::get() noexcept {
 template< typename T >
 bool
 pull_coroutine< T & >::control_block::valid() const noexcept {
-    return nullptr != other && ctx && nullptr != t;
+    return nullptr != other && state_t::none == ( state & state_t::complete) && nullptr != t;
 }
 
 
@@ -266,7 +298,11 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                     // store other exceptions in exception-pointer
                     except = std::current_exception();
                 }
+                // set termination flags
+                state |= state_t::complete;
                 // jump back to ctx
+                auto result = other->ctx();
+                other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
@@ -289,10 +325,15 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                 // store other exceptions in exception-pointer
                 except = std::current_exception();
             }
+            // set termination flags
+            state |= state_t::complete;
             // jump back to ctx
+            auto result = other->ctx();
+            other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
 #endif
+    state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
     auto result = ctx();
@@ -304,7 +345,16 @@ pull_coroutine< void >::control_block::control_block( push_coroutine< void >::co
                                                       boost::context::captured_context & ctx_) noexcept :
     other{ cb },
     ctx{ std::move( ctx_) },
+    state{ state_t::none },
     except{} {
+}
+
+inline
+pull_coroutine< void >::control_block::~control_block() {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        // unwind coroutine stack
+        ctx();
+    }
 }
 
 inline
@@ -320,7 +370,7 @@ pull_coroutine< void >::control_block::resume() {
 inline
 bool
 pull_coroutine< void >::control_block::valid() const noexcept {
-    return nullptr != other && ctx;
+    return nullptr != other && state_t::none == ( state & state_t::complete);
 }
 
 }}}
