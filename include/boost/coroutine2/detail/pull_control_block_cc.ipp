@@ -37,7 +37,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
+        std::move(
          std::bind(
              [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
@@ -85,9 +85,9 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     bvalid{ false },
     storage{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    void * data = nullptr;
-    std::tie( ctx, data) = ctx();
-    set( static_cast< T * >( data) );
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
+    set( static_cast< T * >( std::get< 1 >( result) ) );
 }
 
 template< typename T >
@@ -111,9 +111,9 @@ pull_coroutine< T >::control_block::~control_block() {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    void * data;
-    std::tie( ctx, data) = ctx(); 
-    set( static_cast< T * >( data) );
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
+    set( static_cast< T * >( std::get< 1 >( result) ) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -156,7 +156,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
+        std::move(
          std::bind(
              [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
@@ -203,9 +203,9 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except{},
     t{ nullptr } {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    void * data = nullptr;
-    std::tie( ctx, data) = ctx();
-    t = static_cast< T * >( data);
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
+    t = static_cast< T * >( std::get< 1 >( result) );
 }
 
 template< typename T >
@@ -220,9 +220,9 @@ pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T 
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    void * data;
-    std::tie( ctx, data) = ctx(); 
-    t = static_cast< T * >( data);
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
+    t = static_cast< T * >( std::get< 1 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -249,7 +249,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
+        std::move(
          std::bind(
              [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
@@ -295,8 +295,8 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
 #endif
     except{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    void * ignored = nullptr;
-    std::tie( ctx, ignored) = ctx();
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
 }
 
 inline
@@ -310,8 +310,8 @@ pull_coroutine< void >::control_block::control_block( push_coroutine< void >::co
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    void * ignored;
-    std::tie( ctx, ignored) = ctx(); 
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }

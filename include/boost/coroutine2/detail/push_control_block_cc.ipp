@@ -99,8 +99,8 @@ template< typename T >
 void
 push_coroutine< T >::control_block::resume( T const& data) {
     // pass an pointer to other context
-    void * ignored;
-    std::tie( ctx, ignored) = ctx( const_cast< T * >( & data) );
+    auto result = ctx( const_cast< T * >( & data) );
+    ctx = std::move( std::get< 0 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -110,8 +110,8 @@ template< typename T >
 void
 push_coroutine< T >::control_block::resume( T && data) {
     // pass an pointer to other context
-    void * ignored;
-    std::tie( ctx, ignored) = ctx( std::addressof( data) );
+    auto result = ctx( std::addressof( data) );
+    ctx = std::move( std::get< 0 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -196,8 +196,8 @@ template< typename T >
 void
 push_coroutine< T & >::control_block::resume( T & t) {
     // pass an pointer to other context
-    void * ignored;
-    std::tie( ctx, ignored) = ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ) );
+    auto result = ctx( const_cast< typename std::remove_const< T >::type * >( std::addressof( t) ) );
+    ctx = std::move( std::get< 0 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -275,8 +275,8 @@ push_coroutine< void >::control_block::control_block( pull_coroutine< void >::co
 inline
 void
 push_coroutine< void >::control_block::resume() {
-    void * ignored;
-    std::tie( ctx, ignored) = ctx();
+    auto result = ctx();
+    ctx = std::move( std::get< 0 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
