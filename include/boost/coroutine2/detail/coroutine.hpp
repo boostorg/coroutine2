@@ -28,7 +28,7 @@ class push_coroutine;
 #include <boost/coroutine2/detail/pull_coroutine.hpp>
 #include <boost/coroutine2/detail/push_coroutine.hpp>
 
-#if ! defined(BOOST_USE_SEGMENTED_STACKS)
+#if ! defined(BOOST_USE_EXECUTION_CONTEXT)
 #include <boost/coroutine2/detail/pull_control_block_cc.hpp>
 #include <boost/coroutine2/detail/push_control_block_cc.hpp>
 #else
@@ -39,7 +39,8 @@ class push_coroutine;
 #include <boost/coroutine2/detail/pull_coroutine.ipp>
 #include <boost/coroutine2/detail/push_coroutine.ipp>
 
-#if ! defined(BOOST_USE_SEGMENTED_STACKS)
+#if ! defined(BOOST_USE_EXECUTION_CONTEXT)
+#include <boost/coroutine2/detail/pull_control_block_cc.hpp>
 #include <boost/coroutine2/detail/pull_control_block_cc.ipp>
 #include <boost/coroutine2/detail/push_control_block_cc.ipp>
 #else
