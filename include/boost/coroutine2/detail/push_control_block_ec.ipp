@@ -53,11 +53,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                      typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     // jump back to ctor
-                     T * t = static_cast< T * >( ctx() );
-                     // set transferred value
-                     synthesized_cb.set( t);
                      try {
+                         // jump back to ctor
+                         T * t = static_cast< T * >( ctx() );
+                         // set transferred value
+                         synthesized_cb.set( t);
                          auto fn = std::move( fn_);
                          // call coroutine-fn with synthesized pull_coroutine as argument
                          fn( synthesized);
@@ -83,11 +83,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            T * t = static_cast< T * >( ctx() );
-            // set transferred value
-            synthesized_cb.set( t);
             try {
+                // jump back to ctor
+                T * t = static_cast< T * >( ctx() );
+                // set transferred value
+                synthesized_cb.set( t);
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -189,11 +189,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                      typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T & > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     // jump back to ctor
-                     T * t = static_cast< T * >( ctx() );
-                     // set transferred value
-                     synthesized_cb.t = t;
                      try {
+                         // jump back to ctor
+                         T * t = static_cast< T * >( ctx() );
+                         // set transferred value
+                         synthesized_cb.t = t;
                          auto fn = std::move( fn_);
                          // call coroutine-fn with synthesized pull_coroutine as argument
                          fn( synthesized);
@@ -219,11 +219,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            T * t = static_cast< T * >( ctx() );
-            // set transferred value
-            synthesized_cb.t = t;
             try {
+                // jump back to ctor
+                T * t = static_cast< T * >( ctx() );
+                // set transferred value
+                synthesized_cb.t = t;
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -313,9 +313,9 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
                     pull_coroutine< void > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
-                    // jump back to ctor
-                    ctx();
                     try {
+                        // jump back to ctor
+                        ctx();
                         auto fn = std::move( fn_);
                         // call coroutine-fn with synthesized pull_coroutine as argument
                         fn( synthesized);
@@ -341,9 +341,9 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
             typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            ctx();
             try {
+                // jump back to ctor
+                ctx();
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
