@@ -85,12 +85,10 @@ int main( int argc, char * argv[])
         if ( bind) bind_to_processor( 0);
 
         duration_type overhead_c = overhead_clock();
-        std::cout << "overhead " << overhead_c.count() << " nano seconds" << std::endl;
         boost::uint64_t res = measure_time( overhead_c).count();
         std::cout << "average of " << res << " nano seconds" << std::endl;
 #ifdef BOOST_CONTEXT_CYCLE
         cycle_type overhead_y = overhead_cycle();
-        std::cout << "overhead " << overhead_y << " cpu cycles" << std::endl;
         res = measure_cycles( overhead_y);
         std::cout << "average of " << res << " cpu cycles" << std::endl;
 #endif
