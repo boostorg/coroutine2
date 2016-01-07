@@ -27,7 +27,7 @@ running thread was pinned to a single CPU.
         [10 \u00b5s / 29896 cycles]
     ]
 ]
-
+[/
 [table Performance of asymmetric coroutines (using execution_context)
     [
         [Platform]
@@ -41,6 +41,7 @@ running thread was pinned to a single CPU.
         [14 \u00b5s / 32750 cycles]
         [8 \u00b5s / 15313 cycles]
     ]
+]
 ]
 
 [endsect]
