@@ -28,14 +28,25 @@ class push_coroutine;
 #include <boost/coroutine2/detail/pull_coroutine.hpp>
 #include <boost/coroutine2/detail/push_coroutine.hpp>
 
-#include <boost/coroutine2/detail/pull_control_block.hpp>
-#include <boost/coroutine2/detail/push_control_block.hpp>
+#if ! defined(BOOST_USE_EXECUTION_CONTEXT)
+#include <boost/coroutine2/detail/pull_control_block_cc.hpp>
+#include <boost/coroutine2/detail/push_control_block_cc.hpp>
+#else
+#include <boost/coroutine2/detail/pull_control_block_ec.hpp>
+#include <boost/coroutine2/detail/push_control_block_ec.hpp>
+#endif
 
 #include <boost/coroutine2/detail/pull_coroutine.ipp>
 #include <boost/coroutine2/detail/push_coroutine.ipp>
 
-#include <boost/coroutine2/detail/pull_control_block.ipp>
-#include <boost/coroutine2/detail/push_control_block.ipp>
+#if ! defined(BOOST_USE_EXECUTION_CONTEXT)
+#include <boost/coroutine2/detail/pull_control_block_cc.hpp>
+#include <boost/coroutine2/detail/pull_control_block_cc.ipp>
+#include <boost/coroutine2/detail/push_control_block_cc.ipp>
+#else
+#include <boost/coroutine2/detail/pull_control_block_ec.ipp>
+#include <boost/coroutine2/detail/push_control_block_ec.ipp>
+#endif
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_SUFFIX

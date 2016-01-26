@@ -31,7 +31,7 @@ template< typename ControlBlock, typename StackAllocator, typename Fn >
 ControlBlock * create_control_block( StackAllocator salloc, Fn && fn) {
     auto sctx = salloc.allocate();
     // reserve space for control structure
-#if defined(BOOST_NO_CXX14_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
+#if defined(BOOST_NO_CXX11_CONSTEXPR) || defined(BOOST_NO_CXX11_STD_ALIGN)
     void * sp = static_cast< char * >( sctx.sp) - sizeof( ControlBlock);
     const std::size_t size = sctx.size - sizeof( ControlBlock);
 #else

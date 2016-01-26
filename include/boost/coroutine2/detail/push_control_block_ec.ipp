@@ -33,10 +33,17 @@ namespace detail {
 // push_coroutine< T >
 
 template< typename T >
+void
+push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
+template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                    Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -46,11 +53,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                      typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     // jump back to ctor
-                     T * t = static_cast< T * >( ctx() );
-                     // set transferred value
-                     synthesized_cb.set( t);
                      try {
+                         // jump back to ctor
+                         T * t = static_cast< T * >( ctx() );
+                         // set transferred value
+                         synthesized_cb.set( t);
                          auto fn = std::move( fn_);
                          // call coroutine-fn with synthesized pull_coroutine as argument
                          fn( synthesized);
@@ -76,11 +83,11 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            T * t = static_cast< T * >( ctx() );
-            // set transferred value
-            synthesized_cb.set( t);
             try {
+                // jump back to ctor
+                T * t = static_cast< T * >( ctx() );
+                // set transferred value
+                synthesized_cb.set( t);
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -97,6 +104,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -106,19 +114,26 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
                                                    boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 template< typename T >
-push_coroutine< T >::control_block::~control_block() noexcept {
+push_coroutine< T >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+template< typename T >
+void
+push_coroutine< T >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
@@ -131,10 +146,6 @@ push_coroutine< T >::control_block::resume( T const& t) {
     if ( except) {
         std::rethrow_exception( except);
     }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
-    }
 }
 
 template< typename T >
@@ -145,10 +156,6 @@ push_coroutine< T >::control_block::resume( T && t) {
     ctx( std::addressof( t) );
     if ( except) {
         std::rethrow_exception( except);
-    }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
     }
 }
 
@@ -162,10 +169,17 @@ push_coroutine< T >::control_block::valid() const noexcept {
 // push_coroutine< T & >
 
 template< typename T >
+void
+push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
+template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
                                                      Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -175,11 +189,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                      typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T & > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     // jump back to ctor
-                     T * t = static_cast< T * >( ctx() );
-                     // set transferred value
-                     synthesized_cb.t = t;
                      try {
+                         // jump back to ctor
+                         T * t = static_cast< T * >( ctx() );
+                         // set transferred value
+                         synthesized_cb.t = t;
                          auto fn = std::move( fn_);
                          // call coroutine-fn with synthesized pull_coroutine as argument
                          fn( synthesized);
@@ -205,11 +219,11 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            T * t = static_cast< T * >( ctx() );
-            // set transferred value
-            synthesized_cb.t = t;
             try {
+                // jump back to ctor
+                T * t = static_cast< T * >( ctx() );
+                // set transferred value
+                synthesized_cb.t = t;
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -226,6 +240,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -235,19 +250,26 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
                                                      boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 template< typename T >
-push_coroutine< T & >::control_block::~control_block() noexcept {
+push_coroutine< T & >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+template< typename T >
+void
+push_coroutine< T & >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
@@ -260,10 +282,6 @@ push_coroutine< T & >::control_block::resume( T & t) {
     if ( except) {
         std::rethrow_exception( except);
     }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
-    }
 }
 
 template< typename T >
@@ -275,9 +293,16 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 
 // push_coroutine< void >
 
+inline
+void
+push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
+    boost::context::execution_context ctx = cb->ctx;
+    // destroy control structure
+    cb->~control_block();
+}
+
 template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn) :
-    other{ nullptr },
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
@@ -288,9 +313,9 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
                     pull_coroutine< void > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
-                    // jump back to ctor
-                    ctx();
                     try {
+                        // jump back to ctor
+                        ctx();
                         auto fn = std::move( fn_);
                         // call coroutine-fn with synthesized pull_coroutine as argument
                         fn( synthesized);
@@ -316,9 +341,9 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
             typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            // jump back to ctor
-            ctx();
             try {
+                // jump back to ctor
+                ctx();
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
                 fn( synthesized);
@@ -335,6 +360,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
             BOOST_ASSERT_MSG( false, "push_coroutine is complete");
          }},
 #endif
+    other{ nullptr },
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to get other set
@@ -344,19 +370,26 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
                                                       boost::context::execution_context const& ctx_) noexcept :
-    other{ cb },
     ctx{ ctx_ },
+    other{ cb },
     state{ state_t::none },
     except{} {
 }
 
 inline
-push_coroutine< void >::control_block::~control_block() noexcept {
+push_coroutine< void >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
-        // set early-exit flag
-        state |= state_t::early_exit;
-        ctx();
+        // unwind coroutine stack
+        ctx( context::exec_ontop_arg, unwind_coroutine);
+    }
+}
+
+inline
+void
+push_coroutine< void >::control_block::deallocate() noexcept {
+    if ( state_t::none != ( state & state_t::unwind) ) {
+        destroy( this);
     }
 }
 
@@ -367,10 +400,6 @@ push_coroutine< void >::control_block::resume() {
     ctx();
     if ( except) {
         std::rethrow_exception( except);
-    }
-    // test early-exit-flag
-    if ( state_t::none != ( other->state & state_t::early_exit) ) {
-        throw forced_unwind();
     }
 }
 

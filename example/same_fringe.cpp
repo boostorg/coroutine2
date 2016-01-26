@@ -89,77 +89,83 @@ void traverse(node::ptr_t n, boost::coroutines2::coroutine<std::string>::push_ty
 int main() {
     {
         node::ptr_t left_d(create_left_tree_from("d"));
-        boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(left_d,out);
-            });
-        std::cout << "left tree from d:\n";
-        std::copy(begin(left_d_reader),
-                  end(left_d_reader),
-                  std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << std::endl;
-
         node::ptr_t right_b(create_right_tree_from("b"));
-        boost::coroutines2::coroutine<std::string>::pull_type right_b_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(right_b,out);
-            });
-        std::cout << "right tree from b:\n";
-        std::copy(begin(right_b_reader),
-                  end(right_b_reader),
-                  std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << std::endl;
-
         node::ptr_t right_x(create_right_tree_from("x"));
-        boost::coroutines2::coroutine<std::string>::pull_type right_x_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(right_x,out);
-            });
-        std::cout << "right tree from x:\n";
-        std::copy(begin(right_x_reader),
-                  end(right_x_reader),
-                  std::ostream_iterator<std::string>(std::cout, " "));
-        std::cout << std::endl;
+        {
+            boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(left_d,out);
+                    });
+            std::cout << "left tree from d:\n";
+            std::copy(begin(left_d_reader),
+                    end(left_d_reader),
+                    std::ostream_iterator<std::string>(std::cout, " "));
+            std::cout << std::endl;
+
+            boost::coroutines2::coroutine<std::string>::pull_type right_b_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(right_b,out);
+                    });
+            std::cout << "right tree from b:\n";
+            std::copy(begin(right_b_reader),
+                    end(right_b_reader),
+                    std::ostream_iterator<std::string>(std::cout, " "));
+            std::cout << std::endl;
+
+            boost::coroutines2::coroutine<std::string>::pull_type right_x_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(right_x,out);
+                    });
+            std::cout << "right tree from x:\n";
+            std::copy(begin(right_x_reader),
+                    end(right_x_reader),
+                    std::ostream_iterator<std::string>(std::cout, " "));
+            std::cout << std::endl;
+        }
     }
     {
         node::ptr_t left_d(create_left_tree_from("d"));
-        boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(left_d,out);
-            });
-
         node::ptr_t right_b(create_right_tree_from("b"));
-        boost::coroutines2::coroutine<std::string>::pull_type right_b_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(right_b,out);
-            });
+        {
+            boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(left_d,out);
+                    });
 
-        std::cout << "left tree from d == right tree from b? "
-                  << std::boolalpha
-                  << std::equal(begin(left_d_reader),
-                                end(left_d_reader),
-                                begin(right_b_reader))
-                  << std::endl;
+            boost::coroutines2::coroutine<std::string>::pull_type right_b_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(right_b,out);
+                    });
+
+            std::cout << "left tree from d == right tree from b? "
+                << std::boolalpha
+                << std::equal(begin(left_d_reader),
+                        end(left_d_reader),
+                        begin(right_b_reader))
+                << std::endl;
+        }
     }
     {
         node::ptr_t left_d(create_left_tree_from("d"));
-        boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(left_d,out);
-            });
-
         node::ptr_t right_x(create_right_tree_from("x"));
-        boost::coroutines2::coroutine<std::string>::pull_type right_x_reader(
-            [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
-                traverse(right_x,out);
-            });
+        {
+            boost::coroutines2::coroutine<std::string>::pull_type left_d_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(left_d,out);
+                    });
 
-        std::cout << "left tree from d == right tree from x? "
-                  << std::boolalpha
-                  << std::equal(begin(left_d_reader),
-                                end(left_d_reader),
-                                begin(right_x_reader))
-                  << std::endl;
+            boost::coroutines2::coroutine<std::string>::pull_type right_x_reader(
+                    [&]( boost::coroutines2::coroutine<std::string>::push_type & out) {
+                    traverse(right_x,out);
+                    });
+
+            std::cout << "left tree from d == right tree from x? "
+                << std::boolalpha
+                << std::equal(begin(left_d_reader),
+                        end(left_d_reader),
+                        begin(right_x_reader))
+                << std::endl;
+        }
     }
     std::cout << "Done" << std::endl;
     return EXIT_SUCCESS;
