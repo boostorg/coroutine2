@@ -15,7 +15,7 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 
-#include <boost/context/captured_context.hpp>
+#include <boost/context/execution_context.hpp>
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
@@ -33,7 +33,7 @@ namespace detail {
 template< typename T >
 void
 pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -48,7 +48,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
                 typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T > synthesized{ & synthesized_cb };
@@ -75,7 +75,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void *) mutable {
             // create synthesized push_coroutine< T >
             typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T > synthesized{ & synthesized_cb };
@@ -111,7 +111,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
 
 template< typename T >
 pull_coroutine< T >::control_block::control_block( typename push_coroutine< T >::control_block * cb,
-                                                   boost::context::captured_context & ctx_) noexcept :
+                                                   boost::context::execution_context & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -180,7 +180,7 @@ pull_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -195,7 +195,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
                 typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T & > synthesized{ & synthesized_cb };
@@ -222,7 +222,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void *) mutable {
             // create synthesized push_coroutine< T >
             typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T & > synthesized{ & synthesized_cb };
@@ -257,7 +257,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
 
 template< typename T >
 pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T & >::control_block * cb,
-                                                     boost::context::captured_context & ctx_) noexcept :
+                                                     boost::context::execution_context & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -302,7 +302,7 @@ pull_coroutine< T & >::control_block::valid() const noexcept {
 inline
 void
 pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -316,7 +316,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void *) mutable {
                 // create synthesized push_coroutine< T >
                 typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< void > synthesized{ & synthesized_cb };
@@ -343,7 +343,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void *) mutable {
             // create synthesized push_coroutine< T >
             typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
             push_coroutine< void > synthesized{ & synthesized_cb };
@@ -376,7 +376,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
 
 inline
 pull_coroutine< void >::control_block::control_block( push_coroutine< void >::control_block * cb,
-                                                      boost::context::captured_context & ctx_) noexcept :
+                                                      boost::context::execution_context & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
