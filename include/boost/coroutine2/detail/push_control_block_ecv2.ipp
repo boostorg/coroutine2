@@ -32,11 +32,11 @@ namespace detail {
 template< typename T >
 void
 push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::execution_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< T * > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
-    ctx();
+    ctx( nullptr);
 }
 
 template< typename T >
@@ -47,13 +47,13 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void * data) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T * > ctx, T * data) mutable {
                 // create synthesized pull_coroutine< T >
                 typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
                 pull_coroutine< T > synthesized{ & synthesized_cb };
                 other = & synthesized_cb;
                 // set transferred value
-                synthesized_cb.set( static_cast< T * >( data) );
+                synthesized_cb.set( data);
                 try {
                     auto fn = std::move( fn_);
                     // call coroutine-fn with synthesized pull_coroutine as argument
@@ -67,7 +67,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
+                auto result = other->ctx( nullptr);
                 other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
@@ -76,13 +76,13 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void * data) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T * data) mutable {
             // create synthesized pull_coroutine< T >
             typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
             // set transferred value
-            synthesized_cb.set( static_cast< T * >( data) );
+            synthesized_cb.set( data);
             try {
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
@@ -96,7 +96,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
+            auto result = other->ctx( nullptr);
             other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
@@ -108,7 +108,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
 
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
-                                                   boost::context::execution_context & ctx_) noexcept :
+                                                   boost::context::execution_context< T * > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -157,11 +157,11 @@ push_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 void
 push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::execution_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< T * > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
-    ctx();
+    ctx( nullptr);
 }
 
 template< typename T >
@@ -172,13 +172,13 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void * data) mutable {
-                // create synthesized pull_coroutine< T >
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T * > ctx, T * data) mutable {
+                // create synthesized pull_coroutine< T & >
                 typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                 pull_coroutine< T & > synthesized{ & synthesized_cb };
                 other = & synthesized_cb;
                 // set transferred value
-                synthesized_cb.t = static_cast< T * >( data);
+                synthesized_cb.t = data;
                 try {
                     auto fn = std::move( fn_);
                     // call coroutine-fn with synthesized pull_coroutine as argument
@@ -192,7 +192,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
+                auto result = other->ctx( nullptr);
                 other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
@@ -201,13 +201,13 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void * data) mutable {
-            // create synthesized pull_coroutine< T >
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T * data) mutable {
+            // create synthesized pull_coroutine< T & >
             typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             pull_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
             // set transferred value
-            synthesized_cb.t = static_cast< T * >( data);
+            synthesized_cb.t = data;
             try {
                 auto fn = std::move( fn_);
                 // call coroutine-fn with synthesized pull_coroutine as argument
@@ -221,7 +221,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
+            auto result = other->ctx( nullptr);
             other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
@@ -233,7 +233,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
 
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
-                                                     boost::context::execution_context & ctx_) noexcept :
+                                                     boost::context::execution_context< T * > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -271,7 +271,7 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 inline
 void
 push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::execution_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< void > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -284,8 +284,8 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
     ctx{ std::allocator_arg, palloc, salloc,
         std::move( 
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context ctx, void *) mutable {
-                // create synthesized pull_coroutine< T >
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< void > ctx) mutable {
+                // create synthesized pull_coroutine< void >
                 typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
                 pull_coroutine< void > synthesized{ & synthesized_cb };
                 other = & synthesized_cb;
@@ -302,17 +302,15 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
-                other->ctx = std::move( std::get< 0 >( result) );
+                other->ctx = other->ctx();
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
-             std::placeholders::_1,
-             std::placeholders::_2))},
+             std::placeholders::_1))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context ctx, void *) mutable {
-            // create synthesized pull_coroutine< T >
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< void > ctx) mutable {
+            // create synthesized pull_coroutine< void >
             typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx};
             pull_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
@@ -329,8 +327,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
-            other->ctx = std::move( std::get< 0 >( result) );
+            other->ctx = other->ctx();
             return std::move( other->ctx);
          }},
 #endif
@@ -341,7 +338,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
 
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
-                                                      boost::context::execution_context & ctx_) noexcept :
+                                                      boost::context::execution_context< void > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -359,8 +356,7 @@ push_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 push_coroutine< void >::control_block::resume() {
-    auto result = ctx();
-    ctx = std::move( std::get< 0 >( result) );
+    ctx = ctx();
     if ( except) {
         std::rethrow_exception( except);
     }
