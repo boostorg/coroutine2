@@ -15,7 +15,7 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 
-#include <boost/context/captured_context.hpp>
+#include <boost/context/execution_context.hpp>
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
@@ -33,11 +33,11 @@ namespace detail {
 template< typename T >
 void
 pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< T * > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
-    ctx();
+    ctx( nullptr);
 }
 
 template< typename T >
@@ -48,7 +48,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T * > ctx, T *) mutable {
                 // create synthesized push_coroutine< T >
                 typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T > synthesized{ & synthesized_cb };
@@ -66,7 +66,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
+                auto result = other->ctx( nullptr);
                 other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
@@ -75,7 +75,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T *) mutable {
             // create synthesized push_coroutine< T >
             typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T > synthesized{ & synthesized_cb };
@@ -93,7 +93,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
+            auto result = other->ctx( nullptr);
             other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
@@ -104,14 +104,14 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     bvalid{ false },
     storage{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    auto result = ctx();
+    auto result = ctx( nullptr);
     ctx = std::move( std::get< 0 >( result) );
-    set( static_cast< T * >( std::get< 1 >( result) ) );
+    set( std::get< 1 >( result) );
 }
 
 template< typename T >
 pull_coroutine< T >::control_block::control_block( typename push_coroutine< T >::control_block * cb,
-                                                   boost::context::captured_context & ctx_) noexcept :
+                                                   boost::context::execution_context< T * > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -139,9 +139,9 @@ pull_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    auto result = ctx();
+    auto result = ctx( nullptr);
     ctx = std::move( std::get< 0 >( result) );
-    set( static_cast< T * >( std::get< 1 >( result) ) );
+    set( std::get< 1 >( result) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -180,11 +180,11 @@ pull_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< T * > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
-    ctx();
+    ctx( nullptr);
 }
 
 template< typename T >
@@ -195,8 +195,8 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
-                // create synthesized push_coroutine< T >
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T *> ctx, T *) mutable {
+                // create synthesized push_coroutine< T & >
                 typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T & > synthesized{ & synthesized_cb };
                 other = & synthesized_cb;
@@ -213,7 +213,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
+                auto result = other->ctx( nullptr);
                 other->ctx = std::move( std::get< 0 >( result) );
                 return std::move( other->ctx);
              },
@@ -222,8 +222,8 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
-            // create synthesized push_coroutine< T >
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T *) mutable {
+            // create synthesized push_coroutine< T & >
             typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
@@ -240,7 +240,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
+            auto result = other->ctx( nullptr);
             other->ctx = std::move( std::get< 0 >( result) );
             return std::move( other->ctx);
          }},
@@ -250,14 +250,14 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except{},
     t{ nullptr } {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    auto result = ctx();
+    auto result = ctx( nullptr);
     ctx = std::move( std::get< 0 >( result) );
-    t = static_cast< T * >( std::get< 1 >( result) );
+    t = std::get< 1 >( result);
 }
 
 template< typename T >
 pull_coroutine< T & >::control_block::control_block( typename push_coroutine< T & >::control_block * cb,
-                                                     boost::context::captured_context & ctx_) noexcept :
+                                                     boost::context::execution_context< T * > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -276,9 +276,9 @@ pull_coroutine< T & >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    auto result = ctx();
+    auto result = ctx( nullptr);
     ctx = std::move( std::get< 0 >( result) );
-    t = static_cast< T * >( std::get< 1 >( result) );
+    t = std::get< 1 >( result);
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -287,7 +287,7 @@ pull_coroutine< T & >::control_block::resume() {
 template< typename T >
 T &
 pull_coroutine< T & >::control_block::get() noexcept {
-    return * static_cast< T * >( t);
+    return * t;
 }
 
 template< typename T >
@@ -302,7 +302,7 @@ pull_coroutine< T & >::control_block::valid() const noexcept {
 inline
 void
 pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::captured_context ctx = std::move( cb->ctx);
+    boost::context::execution_context< void > ctx = std::move( cb->ctx);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -316,8 +316,8 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::captured_context ctx, void *) mutable {
-                // create synthesized push_coroutine< T >
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< void > ctx) mutable {
+                // create synthesized push_coroutine< void >
                 typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< void > synthesized{ & synthesized_cb };
                 other = & synthesized_cb;
@@ -334,17 +334,15 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                 // set termination flags
                 state |= state_t::complete;
                 // jump back to ctx
-                auto result = other->ctx();
-                other->ctx = std::move( std::get< 0 >( result) );
+                other->ctx = other->ctx();
                 return std::move( other->ctx);
              },
              std::forward< Fn >( fn),
-             std::placeholders::_1,
-             std::placeholders::_2))},
+             std::placeholders::_1))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::captured_context ctx, void *) mutable {
-            // create synthesized push_coroutine< T >
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< void > ctx) mutable {
+            // create synthesized push_coroutine< void >
             typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
             push_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
@@ -361,8 +359,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
             // set termination flags
             state |= state_t::complete;
             // jump back to ctx
-            auto result = other->ctx();
-            other->ctx = std::move( std::get< 0 >( result) );
+            other->ctx = other->ctx();
             return std::move( other->ctx);
          }},
 #endif
@@ -370,13 +367,12 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    auto result = ctx();
-    ctx = std::move( std::get< 0 >( result) );
+    ctx = ctx();
 }
 
 inline
 pull_coroutine< void >::control_block::control_block( push_coroutine< void >::control_block * cb,
-                                                      boost::context::captured_context & ctx_) noexcept :
+                                                      boost::context::execution_context< void > & ctx_) noexcept :
     ctx{ std::move( ctx_) },
     other{ cb },
     state{ state_t::none },
@@ -394,8 +390,7 @@ pull_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    auto result = ctx();
-    ctx = std::move( std::get< 0 >( result) );
+    ctx = ctx();
     if ( except) {
         std::rethrow_exception( except);
     }
