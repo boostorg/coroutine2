@@ -11,7 +11,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/context/fixedsize_stack.hpp>
+#include <boost/context/pooled_fixedsize_stack.hpp>
 
 #include <boost/coroutine2/detail/coroutine.hpp>
 
