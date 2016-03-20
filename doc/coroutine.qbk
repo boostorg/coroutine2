@@ -13,7 +13,7 @@ Implementations that produce sequences of values typically use asymmetric
 coroutines.
 [footnote Moura, Ana Lucia De and Ierusalimschy, Roberto.
 "Revisiting coroutines". ACM Trans. Program. Lang. Syst., Volume 31 Issue 2,
-February 2014, Article No. 6]
+February 2009, Article No. 6]
 
 
 [heading stackful]
