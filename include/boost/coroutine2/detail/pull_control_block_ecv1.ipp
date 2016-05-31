@@ -36,6 +36,7 @@ void
 pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     boost::context::execution_context ctx = cb->ctx;
     // destroy control structure
+    cb->state |= state_t::destroy;
     cb->~control_block();
 }
 
@@ -52,15 +53,17 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                      typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
                      push_coroutine< T > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     try {
-                         auto fn = std::move( fn_);
-                         // call coroutine-fn with synthesized push_coroutine as argument
-                         fn( synthesized);
-                     } catch ( forced_unwind const&) {
-                         // do nothing for unwinding exception
-                     } catch (...) {
-                         // store other exceptions in exception-pointer
-                         except = std::current_exception();
+                     if ( state_t::none == ( state & state_t::destroy) ) {
+                         try {
+                             auto fn = std::move( fn_);
+                             // call coroutine-fn with synthesized push_coroutine as argument
+                             fn( synthesized);
+                         } catch ( forced_unwind const&) {
+                             // do nothing for unwinding exception
+                         } catch (...) {
+                             // store other exceptions in exception-pointer
+                             except = std::current_exception();
+                         }
                      }
                      // set termination flags
                      state |= state_t::complete;
@@ -78,15 +81,17 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
             typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            try {
-                auto fn = std::move( fn_);
-                // call coroutine-fn with synthesized push_coroutine as argument
-                fn( synthesized);
-            } catch ( forced_unwind const&) {
-                // do nothing for unwinding exception
-            } catch (...) {
-                // store other exceptions in exception-pointer
-                except = std::current_exception();
+            if ( state_t::none == ( state & state_t::destroy) ) {
+                try {
+                    auto fn = std::move( fn_);
+                    // call coroutine-fn with synthesized push_coroutine as argument
+                    fn( synthesized);
+                } catch ( forced_unwind const&) {
+                    // do nothing for unwinding exception
+                } catch (...) {
+                    // store other exceptions in exception-pointer
+                    except = std::current_exception();
+                }
             }
             // set termination flags
             state |= state_t::complete;
@@ -181,6 +186,7 @@ void
 pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     boost::context::execution_context ctx = cb->ctx;
     // destroy control structure
+    cb->state |= state_t::destroy;
     cb->~control_block();
 }
 
@@ -197,15 +203,17 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                      typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                      push_coroutine< T & > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     try {
-                         auto fn = std::move( fn_);
-                         // call coroutine-fn with synthesized push_coroutine as argument
-                         fn( synthesized);
-                     } catch ( forced_unwind const&) {
-                        // do nothing for unwinding exception
-                     } catch (...) {
-                         // store other exceptions in exception-pointer
-                         except = std::current_exception();
+                     if ( state_t::none == ( state & state_t::destroy) ) {
+                         try {
+                             auto fn = std::move( fn_);
+                             // call coroutine-fn with synthesized push_coroutine as argument
+                             fn( synthesized);
+                         } catch ( forced_unwind const&) {
+                            // do nothing for unwinding exception
+                         } catch (...) {
+                             // store other exceptions in exception-pointer
+                             except = std::current_exception();
+                         }
                      }
                      // set termination flags
                      state |= state_t::complete;
@@ -223,15 +231,17 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
             typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T & > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            try {
-                auto fn = std::move( fn_);
-                // call coroutine-fn with synthesized push_coroutine as argument
-                fn( synthesized);
-            } catch ( forced_unwind const&) {
-                // do nothing for unwinding exception
-            } catch (...) {
-                // store other exceptions in exception-pointer
-                except = std::current_exception();
+            if ( state_t::none == ( state & state_t::destroy) ) {
+                try {
+                    auto fn = std::move( fn_);
+                    // call coroutine-fn with synthesized push_coroutine as argument
+                    fn( synthesized);
+                } catch ( forced_unwind const&) {
+                    // do nothing for unwinding exception
+                } catch (...) {
+                    // store other exceptions in exception-pointer
+                    except = std::current_exception();
+                }
             }
             // set termination flags
             state |= state_t::complete;
@@ -305,6 +315,7 @@ void
 pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     boost::context::execution_context ctx = cb->ctx;
     // destroy control structure
+    cb->state |= state_t::destroy;
     cb->~control_block();
 }
 
@@ -320,15 +331,17 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                      typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
                      push_coroutine< void > synthesized{ & synthesized_cb };
                      other = & synthesized_cb;
-                     try {
-                         auto fn = std::move( fn_);
-                         // call coroutine-fn with synthesized push_coroutine as argument
-                         fn( synthesized);
-                     } catch ( forced_unwind const&) {
-                        // do nothing for unwinding exception
-                     } catch (...) {
-                         // store other exceptions in exception-pointer
-                         except = std::current_exception();
+                     if ( state_t::none == ( state & state_t::destroy) ) {
+                         try {
+                             auto fn = std::move( fn_);
+                             // call coroutine-fn with synthesized push_coroutine as argument
+                             fn( synthesized);
+                         } catch ( forced_unwind const&) {
+                            // do nothing for unwinding exception
+                         } catch (...) {
+                             // store other exceptions in exception-pointer
+                             except = std::current_exception();
+                         }
                      }
                      // set termination flags
                      state |= state_t::complete;
@@ -346,15 +359,17 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
             typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
             push_coroutine< void > synthesized{ & synthesized_cb };
             other = & synthesized_cb;
-            try {
-                auto fn = std::move( fn_);
-                // call coroutine-fn with synthesized push_coroutine as argument
-                fn( synthesized);
-            } catch ( forced_unwind const&) {
-                // do nothing for unwinding exception
-            } catch (...) {
-                // store other exceptions in exception-pointer
-                except = std::current_exception();
+            if ( state_t::none == ( state & state_t::destroy) ) {
+                try {
+                    auto fn = std::move( fn_);
+                    // call coroutine-fn with synthesized push_coroutine as argument
+                    fn( synthesized);
+                } catch ( forced_unwind const&) {
+                    // do nothing for unwinding exception
+                } catch (...) {
+                    // store other exceptions in exception-pointer
+                    except = std::current_exception();
+                }
             }
             // set termination flags
             state |= state_t::complete;

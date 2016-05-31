@@ -188,6 +188,7 @@ void f11( coro::coroutine< std::tuple< int, int > >::pull_type & c)
 
 void f12( coro::coroutine< void >::pull_type & c)
 {
+    value1 = 7;
     X x_;
     c();
     c();
@@ -452,6 +453,14 @@ void test_unwind()
         BOOST_CHECK_EQUAL( ( int) 7, value1);
     }
     BOOST_CHECK_EQUAL( ( int) 0, value1);
+    int i = 0;
+    {
+        coro::coroutine< void >::push_type coro(
+            [&i](coro::coroutine< void >::pull_type &) mutable {
+                i = 7;
+        });
+    }
+    BOOST_CHECK_EQUAL( ( int) 0, i);
 }
 
 void test_exceptions()
