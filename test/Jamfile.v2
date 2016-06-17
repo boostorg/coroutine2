@@ -26,7 +26,8 @@ project boost/coroutine2/test
       <threading>multi
     ;
 
-run test_coroutine.cpp : 
+test-suite minimal :
+[ run test_coroutine.cpp : 
     : :
     [ requires cxx11_auto_declarations
                cxx11_constexpr
@@ -38,4 +39,12 @@ run test_coroutine.cpp :
                cxx11_nullptr
                cxx11_rvalue_references
                cxx11_template_aliases
-               cxx11_variadic_templates ] ;
+               cxx11_variadic_templates ] ] ;
+
+test-suite full :
+    minimal ;
+
+test-suite extra ;
+
+explicit minimal ;
+explicit extra ;
