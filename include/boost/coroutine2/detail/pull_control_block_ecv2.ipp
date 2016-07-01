@@ -109,9 +109,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     bvalid{ false },
     storage{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    auto result = ctx( nullptr);
-    ctx = std::move( std::get< 0 >( result) );
-    set( std::get< 1 >( result) );
+    resume();
 }
 
 template< typename T >
@@ -260,9 +258,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except{},
     t{ nullptr } {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    auto result = ctx( nullptr);
-    ctx = std::move( std::get< 0 >( result) );
-    t = std::get< 1 >( result);
+    resume();
 }
 
 template< typename T >
@@ -382,7 +378,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     state{ state_t::unwind },
     except{} {
     // enter coroutine-fn in order to have first value available after ctor (of `*this`) returns
-    ctx = ctx();
+    resume();
 }
 
 inline
