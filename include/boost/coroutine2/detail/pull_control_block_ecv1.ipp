@@ -125,6 +125,7 @@ pull_coroutine< T >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
+        other->ctx = boost::context::execution_context::current();
         ctx( context::exec_ontop_arg, unwind_coroutine);
     }
     // destroy data if it set
@@ -273,6 +274,7 @@ pull_coroutine< T & >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
+        other->ctx = boost::context::execution_context::current();
         ctx( context::exec_ontop_arg, unwind_coroutine);
     }
 }
@@ -399,6 +401,7 @@ pull_coroutine< void >::control_block::~control_block() {
     if ( state_t::none == ( state & state_t::complete) &&
          state_t::none != ( state & state_t::unwind) ) {
         // unwind coroutine stack
+        other->ctx = boost::context::execution_context::current();
         ctx( context::exec_ontop_arg, unwind_coroutine);
     }
 }
