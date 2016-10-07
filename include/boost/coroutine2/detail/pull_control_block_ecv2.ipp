@@ -49,7 +49,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T * > ctx, T *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T * > && ctx, T *) mutable {
                 // create synthesized push_coroutine< T >
                 typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T > synthesized{ & synthesized_cb };
@@ -78,7 +78,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > && ctx, T *) mutable {
             // create synthesized push_coroutine< T >
             typename push_coroutine< T >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T > synthesized{ & synthesized_cb };
@@ -199,7 +199,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T *> ctx, T *) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< T *> && ctx, T *) mutable {
                 // create synthesized push_coroutine< T & >
                 typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< T & > synthesized{ & synthesized_cb };
@@ -228,7 +228,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
              std::placeholders::_2))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > ctx, T *) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< T * > && ctx, T *) mutable {
             // create synthesized push_coroutine< T & >
             typename push_coroutine< T & >::control_block synthesized_cb{ this, ctx };
             push_coroutine< T & > synthesized{ & synthesized_cb };
@@ -323,7 +323,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
     ctx{ std::allocator_arg, palloc, salloc,
         std::move(
          std::bind(
-             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< void > ctx) mutable {
+             [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context< void > && ctx) mutable {
                 // create synthesized push_coroutine< void >
                 typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
                 push_coroutine< void > synthesized{ & synthesized_cb };
@@ -350,7 +350,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
              std::placeholders::_1))},
 #else
     ctx{ std::allocator_arg, palloc, salloc,
-         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< void > ctx) mutable {
+         [this,fn_=std::forward< Fn >( fn)]( boost::context::execution_context< void > && ctx) mutable {
             // create synthesized push_coroutine< void >
             typename push_coroutine< void >::control_block synthesized_cb{ this, ctx };
             push_coroutine< void > synthesized{ & synthesized_cb };
