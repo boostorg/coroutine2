@@ -45,7 +45,7 @@ public:
     template< typename StackAllocator, typename Fn >
     push_coroutine( StackAllocator, Fn &&);
 
-    ~push_coroutine() noexcept;
+    ~push_coroutine();
 
     push_coroutine( push_coroutine const&) = delete;
     push_coroutine & operator=( push_coroutine const&) = delete;
@@ -125,7 +125,7 @@ public:
     template< typename StackAllocator, typename Fn >
     push_coroutine( StackAllocator, Fn &&);
 
-    ~push_coroutine() noexcept;
+    ~push_coroutine();
 
     push_coroutine( push_coroutine const&) = delete;
     push_coroutine & operator=( push_coroutine const&) = delete;
@@ -203,7 +203,7 @@ public:
     template< typename StackAllocator, typename Fn >
     push_coroutine( StackAllocator, Fn &&);
 
-    ~push_coroutine() noexcept;
+    ~push_coroutine();
 
     push_coroutine( push_coroutine const&) = delete;
     push_coroutine & operator=( push_coroutine const&) = delete;
