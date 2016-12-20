@@ -72,7 +72,7 @@ public:
         push_coroutine< T > *   c_{ nullptr };
 
     public:
-        constexpr iterator() noexcept = default;
+        iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T > * c) noexcept :
             c_{ c } {
@@ -150,7 +150,7 @@ public:
         push_coroutine< T & >   *   c_{ nullptr };
 
     public:
-        constexpr iterator() noexcept = default;
+        iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T & > * c) noexcept :
             c_{ c } {
