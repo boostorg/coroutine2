@@ -79,7 +79,7 @@ public:
         }
 
         iterator & operator=( T t) {
-            BOOST_ASSERT( c_);
+            BOOST_ASSERT( nullptr != c_);
             if ( ! ( * c_)( t) ) {
                 c_ = nullptr;
             }
@@ -157,7 +157,7 @@ public:
         }
 
         iterator & operator=( T & t) {
-            BOOST_ASSERT( c_);
+            BOOST_ASSERT( nullptr != c_);
             if ( ! ( * c_)( t) ) {
                 c_ = nullptr;
             }

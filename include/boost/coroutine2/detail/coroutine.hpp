@@ -34,8 +34,8 @@ class push_coroutine;
 #  include <boost/coroutine2/detail/pull_control_block_ecv1.hpp>
 #  include <boost/coroutine2/detail/push_control_block_ecv1.hpp>
 # else
-#  include <boost/coroutine2/detail/pull_control_block_ecv2.hpp>
-#  include <boost/coroutine2/detail/push_control_block_ecv2.hpp>
+#  include <boost/coroutine2/detail/pull_control_block_cc.hpp>
+#  include <boost/coroutine2/detail/push_control_block_cc.hpp>
 # endif
 
 # include <boost/coroutine2/detail/pull_coroutine.ipp>
@@ -45,8 +45,8 @@ class push_coroutine;
 #  include <boost/coroutine2/detail/pull_control_block_ecv1.ipp>
 #  include <boost/coroutine2/detail/push_control_block_ecv1.ipp>
 # else
-#  include <boost/coroutine2/detail/pull_control_block_ecv2.ipp>
-#  include <boost/coroutine2/detail/push_control_block_ecv2.ipp>
+#  include <boost/coroutine2/detail/pull_control_block_cc.ipp>
+#  include <boost/coroutine2/detail/push_control_block_cc.ipp>
 # endif
 #endif
 
