@@ -38,7 +38,7 @@ pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::callcc( std::move( c) );
+    boost::context::resume( std::move( c) );
 }
 
 template< typename T >
@@ -76,7 +76,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                         // set termination flags
                         state |= state_t::complete;
                         // jump back
-                        return boost::context::callcc( std::move( other->c) );
+                        return boost::context::resume( std::move( other->c) );
                      },
                      std::forward< Fn >( fn),
                      std::placeholders::_1) ) );
@@ -103,11 +103,11 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::callcc( std::move( other->c) );
+               return boost::context::resume( std::move( other->c) );
             });
 #endif
-    if ( boost::context::has_data( c) ) {
-        set( boost::context::data< T >( c) );
+    if ( boost::context::data_available( c) ) {
+        set( boost::context::transfer_data< T >( c) );
     }
 }
 
@@ -141,9 +141,9 @@ pull_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    c = boost::context::callcc( std::move( c) );
-    if ( boost::context::has_data( c) ) {
-        set( boost::context::data< T >( c) );
+    c = boost::context::resume( std::move( c) );
+    if ( boost::context::data_available( c) ) {
+        set( boost::context::transfer_data< T >( c) );
     } else {
         reset();
     }
@@ -207,7 +207,7 @@ pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::callcc( std::move( c) );
+    boost::context::resume( std::move( c) );
 }
 
 template< typename T >
@@ -245,7 +245,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::callcc( std::move( other->c) );
+                    return boost::context::resume( std::move( other->c) );
                  },
                  std::forward< Fn >( fn),
                  std::placeholders::_1) ) );
@@ -272,11 +272,11 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::callcc( std::move( other->c) );
+               return boost::context::resume( std::move( other->c) );
             });
 #endif
-    if ( boost::context::has_data( c) ) {
-        set( boost::context::data< T & >( c) );
+    if ( boost::context::data_available( c) ) {
+        set( boost::context::transfer_data< T & >( c) );
     }
 }
 
@@ -302,9 +302,9 @@ pull_coroutine< T & >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    c = boost::context::callcc( std::move( c) );
-    if ( boost::context::has_data( c) ) {
-        set( boost::context::data< T & >( c) );
+    c = boost::context::resume( std::move( c) );
+    if ( boost::context::data_available( c) ) {
+        set( boost::context::transfer_data< T & >( c) );
     } else {
         reset();
     }
@@ -352,7 +352,7 @@ pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::callcc( std::move( c) );
+    boost::context::resume( std::move( c) );
 }
 
 template< typename StackAllocator, typename Fn >
@@ -387,7 +387,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::callcc( std::move( other->c) );
+                    return boost::context::resume( std::move( other->c) );
                  },
                  std::forward< Fn >( fn),
                  std::placeholders::_1) ) );
@@ -414,7 +414,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back to ctx
-               return boost::context::callcc( std::move( other->c) );
+               return boost::context::resume( std::move( other->c) );
             });
 #endif
 }
@@ -439,7 +439,7 @@ pull_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    c = boost::context::callcc( std::move( c) );
+    c = boost::context::resume( std::move( c) );
     if ( except) {
         std::rethrow_exception( except);
     }
