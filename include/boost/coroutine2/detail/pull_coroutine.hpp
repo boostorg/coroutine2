@@ -92,7 +92,7 @@ public:
         typedef typename iterator::pointer pointer_t;
         typedef typename iterator::reference reference_t;
 
-        constexpr iterator() noexcept = default;
+        iterator() noexcept = default;
 
         explicit iterator( pull_coroutine< T > * c) noexcept :
             c_{ c } {
@@ -204,7 +204,7 @@ public:
         typedef typename iterator::pointer pointer_t;
         typedef typename iterator::reference reference_t;
 
-        constexpr iterator() noexcept = default;
+        iterator() noexcept = default;
 
         explicit iterator( pull_coroutine< T & > * c) noexcept :
             c_{ c } {
