@@ -19,6 +19,7 @@
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
+#include <boost/coroutine2/detail/wrap.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -54,32 +55,29 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
-            std::move(
-                 std::bind(
-                     [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
-                        // create synthesized push_coroutine< T >
-                        typename push_coroutine< T >::control_block synthesized_cb{ this, c };
-                        push_coroutine< T > synthesized{ & synthesized_cb };
-                        other = & synthesized_cb;
-                        if ( state_t::none == ( state & state_t::destroy) ) {
-                            try {
-                                auto fn = std::move( fn_);
-                                // call coroutine-fn with synthesized push_coroutine as argument
-                                fn( synthesized);
-                            } catch ( boost::context::detail::forced_unwind const&) {
-                                throw;
-                            } catch (...) {
-                                // store other exceptions in exception-pointer
-                                except = std::current_exception();
-                            }
+            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
+                    // create synthesized push_coroutine< T >
+                    typename push_coroutine< T >::control_block synthesized_cb{ this, c };
+                    push_coroutine< T > synthesized{ & synthesized_cb };
+                    other = & synthesized_cb;
+                    if ( state_t::none == ( state & state_t::destroy) ) {
+                        try {
+                            auto fn = std::move( fn_);
+                            // call coroutine-fn with synthesized push_coroutine as argument
+                            fn( synthesized);
+                        } catch ( boost::context::detail::forced_unwind const&) {
+                            throw;
+                        } catch (...) {
+                            // store other exceptions in exception-pointer
+                            except = std::current_exception();
                         }
-                        // set termination flags
-                        state |= state_t::complete;
-                        // jump back
-                        return boost::context::resume( std::move( other->c) );
-                     },
-                     std::forward< Fn >( fn),
-                     std::placeholders::_1) ) );
+                    }
+                    // set termination flags
+                    state |= state_t::complete;
+                    // jump back
+                    return boost::context::resume( std::move( other->c) );
+                 },
+                 std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
@@ -223,9 +221,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
-            std::move(
-             std::bind(
-                 [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
+            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
                     // create synthesized push_coroutine< T & >
                     typename push_coroutine< T & >::control_block synthesized_cb{ this, c };
                     push_coroutine< T & > synthesized{ & synthesized_cb };
@@ -247,8 +243,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // jump back
                     return boost::context::resume( std::move( other->c) );
                  },
-                 std::forward< Fn >( fn),
-                 std::placeholders::_1) ) );
+                 std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
@@ -365,9 +360,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
-            std::move(
-             std::bind(
-                 [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
+            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
                     // create synthesized push_coroutine< void >
                     typename push_coroutine< void >::control_block synthesized_cb{ this, c };
                     push_coroutine< void > synthesized{ & synthesized_cb };
@@ -389,8 +382,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                     // jump back
                     return boost::context::resume( std::move( other->c) );
                  },
-                 std::forward< Fn >( fn),
-                 std::placeholders::_1) ) );
+                 std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
             std::allocator_arg, palloc, salloc,
