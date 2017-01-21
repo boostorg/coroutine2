@@ -21,6 +21,7 @@
 #include <boost/coroutine2/detail/decay_copy.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
 #include <boost/coroutine2/detail/state.hpp>
+#include <boost/coroutine2/detail/wrap.hpp>
 
 #ifdef BOOST_HAS_ABI_HEADERS
 #  include BOOST_ABI_PREFIX
@@ -47,9 +48,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                                                    Fn && fn) :
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
-         std::bind(
-                 [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx, void * vp) mutable noexcept {
+         wrap( [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx, void * vp) mutable noexcept {
                      // create synthesized pull_coroutine< T >
                      typename pull_coroutine< T >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T > synthesized{ & synthesized_cb };
@@ -77,8 +76,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                      BOOST_ASSERT_MSG( false, "push_coroutine is complete");
                  },
                  std::forward< Fn >( fn),
-                 boost::context::execution_context::current(),
-                 std::placeholders::_1))},
+                 boost::context::execution_context::current() ) },
 #else
     ctx{ std::allocator_arg, palloc, salloc,
          [this,fn_=decay_copy( std::forward< Fn >( fn) ),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
@@ -189,9 +187,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                                                      Fn && fn) :
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
-         std::bind(
-                 [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx, void * vp) mutable noexcept {
+         wrap( [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx, void * vp) mutable noexcept {
                      // create synthesized pull_coroutine< T >
                      typename pull_coroutine< T & >::control_block synthesized_cb{ this, ctx };
                      pull_coroutine< T & > synthesized{ & synthesized_cb };
@@ -219,8 +215,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                      BOOST_ASSERT_MSG( false, "push_coroutine is complete");
                  },
                  std::forward< Fn >( fn),
-                 boost::context::execution_context::current(),
-                 std::placeholders::_1))},
+                 boost::context::execution_context::current() ) },
 #else
     ctx{ std::allocator_arg, palloc, salloc,
          [this,fn_=decay_copy( std::forward< Fn >( fn) ),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
@@ -318,9 +313,7 @@ template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn) :
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     ctx{ std::allocator_arg, palloc, salloc,
-        std::move( 
-            std::bind(
-                [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx,
+         wrap( [this]( typename std::decay< Fn >::type & fn_, boost::context::execution_context & ctx,
                         void * vp) mutable noexcept {
                     // create synthesized pull_coroutine< T >
                     typename pull_coroutine< void >::control_block synthesized_cb{ this, ctx };
@@ -347,8 +340,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     BOOST_ASSERT_MSG( false, "push_coroutine is complete");
                 },
                 std::forward< Fn >( fn),
-                boost::context::execution_context::current(),
-                std::placeholders::_1))},
+                boost::context::execution_context::current() ) },
 #else
     ctx{ std::allocator_arg, palloc, salloc,
          [this,fn_=decay_copy( std::forward< Fn >( fn) ),ctx=boost::context::execution_context::current()] (void *) mutable noexcept {
