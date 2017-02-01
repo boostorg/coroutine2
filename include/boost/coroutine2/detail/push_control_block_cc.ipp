@@ -60,7 +60,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     other->c = boost::context::resume( std::move( other->c) );
                     // set transferred value
                     if ( boost::context::data_available( other->c) ) {
-                        synthesized_cb.set( boost::context::transfer_data< T >( other->c) );
+                        synthesized_cb.set( boost::context::get_data< T >( other->c) );
                     } else {
                         synthesized_cb.reset();
                     }
@@ -93,7 +93,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                other->c = boost::context::resume( std::move( other->c) );
                // set transferred value
                if ( boost::context::data_available( other->c) ) {
-                   synthesized_cb.set( boost::context::transfer_data< T >( other->c) );
+                   synthesized_cb.set( boost::context::get_data< T >( other->c) );
                } else {
                    synthesized_cb.reset();
                }
@@ -193,7 +193,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     other->c = boost::context::resume( std::move( other->c) );
                     // set transferred value
                     if ( boost::context::data_available( other->c) ) {
-                        synthesized_cb.set( boost::context::transfer_data< T & >( other->c) );
+                        synthesized_cb.set( boost::context::get_data< T & >( other->c) );
                     } else {
                         synthesized_cb.reset();
                     }
@@ -226,7 +226,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                other->c = boost::context::resume( std::move( other->c) );
                // set transferred value
                if ( boost::context::data_available( other->c) ) {
-                   synthesized_cb.set( boost::context::transfer_data< T & >( other->c) );
+                   synthesized_cb.set( boost::context::get_data< T & >( other->c) );
                } else {
                    synthesized_cb.reset();
                }

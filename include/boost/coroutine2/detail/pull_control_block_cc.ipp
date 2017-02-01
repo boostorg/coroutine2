@@ -105,7 +105,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
             });
 #endif
     if ( boost::context::data_available( c) ) {
-        set( boost::context::transfer_data< T >( c) );
+        set( boost::context::get_data< T >( c) );
     }
 }
 
@@ -141,7 +141,7 @@ void
 pull_coroutine< T >::control_block::resume() {
     c = boost::context::resume( std::move( c) );
     if ( boost::context::data_available( c) ) {
-        set( boost::context::transfer_data< T >( c) );
+        set( boost::context::get_data< T >( c) );
     } else {
         reset();
     }
@@ -271,7 +271,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
             });
 #endif
     if ( boost::context::data_available( c) ) {
-        set( boost::context::transfer_data< T & >( c) );
+        set( boost::context::get_data< T & >( c) );
     }
 }
 
@@ -299,7 +299,7 @@ void
 pull_coroutine< T & >::control_block::resume() {
     c = boost::context::resume( std::move( c) );
     if ( boost::context::data_available( c) ) {
-        set( boost::context::transfer_data< T & >( c) );
+        set( boost::context::get_data< T & >( c) );
     } else {
         reset();
     }
