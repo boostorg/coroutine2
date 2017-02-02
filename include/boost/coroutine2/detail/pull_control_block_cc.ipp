@@ -39,7 +39,7 @@ pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+    c();
 }
 
 template< typename T >
@@ -75,7 +75,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -101,7 +101,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
     if ( boost::context::data_available( c) ) {
@@ -139,7 +139,7 @@ pull_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    c = boost::context::resume( std::move( c) );
+    c = c();
     if ( boost::context::data_available( c) ) {
         set( boost::context::get_data< T >( c) );
     } else {
@@ -205,7 +205,7 @@ pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+    c();
 }
 
 template< typename T >
@@ -241,7 +241,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -267,7 +267,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
     if ( boost::context::data_available( c) ) {
@@ -297,7 +297,7 @@ pull_coroutine< T & >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    c = boost::context::resume( std::move( c) );
+    c = c();
     if ( boost::context::data_available( c) ) {
         set( boost::context::get_data< T & >( c) );
     } else {
@@ -347,7 +347,7 @@ pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+    c();
 }
 
 template< typename StackAllocator, typename Fn >
@@ -380,7 +380,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -406,7 +406,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back to ctx
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
 }
@@ -431,7 +431,7 @@ pull_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    c = boost::context::resume( std::move( c) );
+    c = c();
     if ( except) {
         std::rethrow_exception( except);
     }

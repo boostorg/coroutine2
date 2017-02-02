@@ -38,7 +38,7 @@ push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+    c();
 }
 
 template< typename T >
@@ -57,7 +57,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
                     pull_coroutine< T > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
-                    other->c = boost::context::resume( std::move( other->c) );
+                    other->c = other->c();
                     // set transferred value
                     if ( boost::context::data_available( other->c) ) {
                         synthesized_cb.set( boost::context::get_data< T >( other->c) );
@@ -79,7 +79,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -90,7 +90,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
                pull_coroutine< T > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = boost::context::resume( std::move( other->c) );
+               other->c =  other->c();
                // set transferred value
                if ( boost::context::data_available( other->c) ) {
                    synthesized_cb.set( boost::context::get_data< T >( other->c) );
@@ -112,7 +112,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
 }
@@ -138,7 +138,7 @@ template< typename T >
 void
 push_coroutine< T >::control_block::resume( T const& data) {
     // pass an pointer to other context
-    c = boost::context::resume( std::move( c), data);
+    c = c( data);
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -148,7 +148,7 @@ template< typename T >
 void
 push_coroutine< T >::control_block::resume( T && data) {
     // pass an pointer to other context
-    c = boost::context::resume( std::move( c), std::move( data) );
+    c = c( std::move( data) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -171,7 +171,7 @@ push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+   c();
 }
 
 template< typename T >
@@ -190,7 +190,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
                     pull_coroutine< T & > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
-                    other->c = boost::context::resume( std::move( other->c) );
+                    other->c = other->c();
                     // set transferred value
                     if ( boost::context::data_available( other->c) ) {
                         synthesized_cb.set( boost::context::get_data< T & >( other->c) );
@@ -212,7 +212,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -223,7 +223,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
                pull_coroutine< T & > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = boost::context::resume( std::move( other->c) );
+               other->c = other->c();
                // set transferred value
                if ( boost::context::data_available( other->c) ) {
                    synthesized_cb.set( boost::context::get_data< T & >( other->c) );
@@ -245,7 +245,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
 }
@@ -271,7 +271,7 @@ template< typename T >
 void
 push_coroutine< T & >::control_block::resume( T & t) {
     // pass an pointer to other context
-    c = boost::context::resume( std::move( c), std::ref( t) );
+    c = c( std::ref( t) );
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -294,7 +294,7 @@ push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    boost::context::resume( std::move( c) );
+    c();
 }
 
 template< typename StackAllocator, typename Fn >
@@ -311,7 +311,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     typename pull_coroutine< void >::control_block synthesized_cb{ this, c };
                     pull_coroutine< void > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
-                    other->c = boost::context::resume( std::move( other->c) );
+                    other->c =  other->c();
                     if ( state_t::none == ( state & state_t::destroy) ) {
                         try {
                             auto fn = std::move( fn_);
@@ -327,7 +327,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return boost::context::resume( std::move( other->c) );
+                    return other->c();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -338,7 +338,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                typename pull_coroutine< void >::control_block synthesized_cb{ this, c};
                pull_coroutine< void > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = boost::context::resume( std::move( other->c) );
+               other->c = other->c();
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -354,7 +354,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return boost::context::resume( std::move( other->c) );
+               return other->c();
             });
 #endif
 }
@@ -379,7 +379,7 @@ push_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 push_coroutine< void >::control_block::resume() {
-    c = boost::context::resume( std::move( c) );
+    c = c();
     if ( except) {
         std::rethrow_exception( except);
     }
