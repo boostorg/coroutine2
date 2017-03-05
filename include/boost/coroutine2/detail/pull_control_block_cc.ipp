@@ -39,7 +39,7 @@ pull_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    c();
+    c.resume();
 }
 
 template< typename T >
@@ -75,7 +75,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return other->c();
+                    return other->c.resume();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -101,11 +101,11 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c();
+               return other->c.resume();
             });
 #endif
-    if ( boost::context::data_available( c) ) {
-        set( boost::context::get_data< T >( c) );
+    if ( c.data_available() ) {
+        set( c.get_data< T >() );
     }
 }
 
@@ -139,9 +139,9 @@ pull_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    c = c();
-    if ( boost::context::data_available( c) ) {
-        set( boost::context::get_data< T >( c) );
+    c = c.resume();
+    if ( c.data_available() ) {
+        set( c.get_data< T >() );
     } else {
         reset();
     }
@@ -205,7 +205,7 @@ pull_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    c();
+    c.resume();
 }
 
 template< typename T >
@@ -241,7 +241,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return other->c();
+                    return other->c.resume();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -267,11 +267,11 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c();
+               return other->c.resume();
             });
 #endif
-    if ( boost::context::data_available( c) ) {
-        set( boost::context::get_data< T & >( c) );
+    if ( c.data_available() ) {
+        set( c.get_data< T & >() );
     }
 }
 
@@ -297,9 +297,9 @@ pull_coroutine< T & >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    c = c();
-    if ( boost::context::data_available( c) ) {
-        set( boost::context::get_data< T & >( c) );
+    c = c.resume();
+    if ( c.data_available() ) {
+        set( c.get_data< T & >() );
     } else {
         reset();
     }
@@ -347,7 +347,7 @@ pull_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    c();
+    c.resume();
 }
 
 template< typename StackAllocator, typename Fn >
@@ -380,7 +380,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                     // set termination flags
                     state |= state_t::complete;
                     // jump back
-                    return other->c();
+                    return other->c.resume();
                  },
                  std::forward< Fn >( fn) ) );
 #else
@@ -406,7 +406,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back to ctx
-               return other->c();
+               return other->c.resume();
             });
 #endif
 }
@@ -431,7 +431,7 @@ pull_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    c = c();
+    c = c.resume();
     if ( except) {
         std::rethrow_exception( except);
     }
