@@ -39,7 +39,3 @@ exe layout
 exe parser
     : parser.cpp
     ;
-
-#exe segmented
-#    : segmented.cpp
-#    ;
