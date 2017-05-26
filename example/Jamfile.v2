@@ -40,6 +40,6 @@ exe parser
     : parser.cpp
     ;
 
-#exe segmented
-#    : segmented.cpp
-#    ;
+exe segmented
+    : segmented.cpp
+    ;
