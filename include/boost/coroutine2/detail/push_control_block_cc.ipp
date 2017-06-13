@@ -38,7 +38,6 @@ push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    c.resume();
 }
 
 template< typename T >
@@ -171,7 +170,6 @@ push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-   c.resume();
 }
 
 template< typename T >
@@ -294,7 +292,6 @@ push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
     cb->~control_block();
     // destroy coroutine's stack
     cb->state |= state_t::destroy;
-    c.resume();
 }
 
 template< typename StackAllocator, typename Fn >
