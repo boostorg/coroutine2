@@ -470,7 +470,29 @@ void test_unwind()
                 i = 7;
         });
     }
-    BOOST_CHECK_EQUAL( ( int) 0, i);
+    {
+        BOOST_CHECK_EQUAL( ( int) 0, value1);
+        auto * coro = new coro::coroutine< void >::pull_type(
+            [](coro::coroutine< void >::push_type & coro) mutable {
+                X x;
+                coro();
+            });
+        BOOST_CHECK_EQUAL( ( int) 7, value1);
+        delete coro;
+        BOOST_CHECK_EQUAL( ( int) 0, value1);
+    }
+    {
+        BOOST_CHECK_EQUAL( ( int) 0, value1);
+        auto * coro = new coro::coroutine< void >::push_type(
+            [](coro::coroutine< void >::pull_type & coro) mutable {
+                X x;
+                coro();
+            });
+        ( * coro)();
+        BOOST_CHECK_EQUAL( ( int) 7, value1);
+        delete coro;
+        BOOST_CHECK_EQUAL( ( int) 0, value1);
+    }
 }
 
 void test_exceptions()
