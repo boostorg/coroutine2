@@ -57,12 +57,6 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                     pull_coroutine< T > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
                     other->c = other->c.resume();
-                    // set transferred value
-                    if ( other->c.data_available() ) {
-                        synthesized_cb.set( other->c.template get_data< T >() );
-                    } else {
-                        synthesized_cb.reset();
-                    }
                     if ( state_t::none == ( state & state_t::destroy) ) {
                         try {
                             auto fn = std::move( fn_);
@@ -90,12 +84,6 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                pull_coroutine< T > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
                other->c = other->c.resume();
-               // set transferred value
-               if ( other->c.data_available() ) {
-                   synthesized_cb.set( other->c.template get_data< T >() );
-               } else {
-                   synthesized_cb.reset();
-               }
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -136,8 +124,10 @@ push_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 push_coroutine< T >::control_block::resume( T const& data) {
-    // pass an pointer to other context
-    c = c.resume( data);
+    // pass data to other context
+    other->set( data);
+    // resume other context
+    c = c.resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -146,8 +136,10 @@ push_coroutine< T >::control_block::resume( T const& data) {
 template< typename T >
 void
 push_coroutine< T >::control_block::resume( T && data) {
-    // pass an pointer to other context
-    c = c.resume( std::move( data) );
+    // pass data to other context
+    other->set( std::move( data) );
+    // resume other context
+    c = c.resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -189,12 +181,6 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                     pull_coroutine< T & > synthesized{ & synthesized_cb };
                     other = & synthesized_cb;
                     other->c = other->c.resume();
-                    // set transferred value
-                    if ( other->c.data_available() ) {
-                        synthesized_cb.set( other->c.template get_data< T & >() );
-                    } else {
-                        synthesized_cb.reset();
-                    }
                     if ( state_t::none == ( state & state_t::destroy) ) {
                         try {
                             auto fn = std::move( fn_);
@@ -222,12 +208,6 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                pull_coroutine< T & > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
                other->c = other->c.resume();
-               // set transferred value
-               if ( other->c.data_available() ) {
-                   synthesized_cb.set( other->c.template get_data< T & >() );
-               } else {
-                   synthesized_cb.reset();
-               }
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -267,9 +247,11 @@ push_coroutine< T & >::control_block::deallocate() noexcept {
 
 template< typename T >
 void
-push_coroutine< T & >::control_block::resume( T & t) {
-    // pass an pointer to other context
-    c = c.resume( std::ref( t) );
+push_coroutine< T & >::control_block::resume( T & data) {
+    // pass data to other context
+    other->set( data);
+    // resume other context
+    c = c.resume();
     if ( except) {
         std::rethrow_exception( except);
     }
