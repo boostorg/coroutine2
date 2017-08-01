@@ -103,9 +103,6 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                return other->c.resume();
             });
 #endif
-    if ( c.data_available() ) {
-        set( c.get_data< T >() );
-    }
 }
 
 template< typename T >
@@ -139,11 +136,6 @@ template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
     c = c.resume();
-    if ( c.data_available() ) {
-        set( c.get_data< T >() );
-    } else {
-        reset();
-    }
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -169,16 +161,6 @@ pull_coroutine< T >::control_block::set( T && t) {
     }
     ::new ( static_cast< void * >( std::addressof( storage) ) ) T( std::move( t) );
     bvalid = true;
-}
-
-template< typename T >
-void
-pull_coroutine< T >::control_block::reset() {
-    // destroy data if set
-    if ( bvalid) {
-        reinterpret_cast< T * >( std::addressof( storage) )->~T();
-    }
-    bvalid = false;
 }
 
 template< typename T >
@@ -268,9 +250,6 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                return other->c.resume();
             });
 #endif
-    if ( c.data_available() ) {
-        set( c.get_data< T & >() );
-    }
 }
 
 template< typename T >
@@ -296,11 +275,6 @@ template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
     c = c.resume();
-    if ( c.data_available() ) {
-        set( c.get_data< T & >() );
-    } else {
-        reset();
-    }
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -311,15 +285,6 @@ void
 pull_coroutine< T & >::control_block::set( T & t) {
     ::new ( static_cast< void * >( std::addressof( storage) ) ) holder{ t };
     bvalid = true;
-}
-
-template< typename T >
-void
-pull_coroutine< T & >::control_block::reset() {
-    if ( bvalid) {
-        reinterpret_cast< holder * >( std::addressof( storage) )->~holder();
-    }
-    bvalid = false;
 }
 
 template< typename T >

@@ -50,7 +50,6 @@ struct pull_coroutine< T >::control_block {
 
     void set( T const&);
     void set( T &&);
-    void reset();
 
     T & get() noexcept;
 
@@ -89,7 +88,6 @@ struct pull_coroutine< T & >::control_block {
     void resume();
 
     void set( T &);
-    void reset();
 
     T & get() noexcept;
 
