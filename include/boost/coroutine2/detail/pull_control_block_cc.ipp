@@ -103,6 +103,9 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                return other->c.resume();
             });
 #endif
+    if ( except) {
+        std::rethrow_exception( except);
+    }
 }
 
 template< typename T >
@@ -250,6 +253,9 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                return other->c.resume();
             });
 #endif
+    if ( except) {
+        std::rethrow_exception( except);
+    }
 }
 
 template< typename T >
@@ -371,6 +377,9 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                return other->c.resume();
             });
 #endif
+    if ( except) {
+        std::rethrow_exception( except);
+    }
 }
 
 inline
