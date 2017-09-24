@@ -42,7 +42,7 @@ push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
 
 template< typename T >
 template< typename StackAllocator, typename Fn >
-push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
+push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc,
                                                    Fn && fn) :
     c{},
     other{ nullptr },
@@ -50,7 +50,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
     except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
                     // create synthesized pull_coroutine< T >
                     typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
@@ -77,7 +77,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                  std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
                // create synthesized pull_coroutine< T >
                typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
@@ -166,7 +166,7 @@ push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
 
 template< typename T >
 template< typename StackAllocator, typename Fn >
-push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator salloc,
+push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc,
                                                      Fn && fn) :
     c{},
     other{ nullptr },
@@ -174,7 +174,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
                     // create synthesized pull_coroutine< T & >
                     typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
@@ -201,7 +201,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                  std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
                // create synthesized pull_coroutine< T & >
                typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
@@ -277,14 +277,14 @@ push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
 }
 
 template< typename StackAllocator, typename Fn >
-push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator salloc, Fn && fn) :
+push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc, Fn && fn) :
     c{},
     other{ nullptr },
     state{ state_t::unwind },
     except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
                     // create synthesized pull_coroutine< void >
                     typename pull_coroutine< void >::control_block synthesized_cb{ this, c };
@@ -311,7 +311,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                  std::forward< Fn >( fn) ) );
 #else
     c = boost::context::callcc(
-            std::allocator_arg, palloc, salloc,
+            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
             [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
                // create synthesized pull_coroutine< void >
                typename pull_coroutine< void >::control_block synthesized_cb{ this, c};
