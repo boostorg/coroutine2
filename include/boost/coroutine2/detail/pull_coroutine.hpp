@@ -56,7 +56,7 @@ public:
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        std::swap(cb_, other.cb_);
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
@@ -167,7 +167,7 @@ public:
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        std::swap(cb_, other.cb_);
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
@@ -276,7 +276,7 @@ public:
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        std::swap(cb_, other.cb_);
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
