@@ -54,8 +54,7 @@ public:
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        cb_ = other.cb_;
-        other.cb_ = nullptr;
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
@@ -134,8 +133,7 @@ public:
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        cb_ = other.cb_;
-        other.cb_ = nullptr;
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
@@ -212,8 +210,7 @@ public:
 
     push_coroutine & operator=( push_coroutine && other) noexcept {
         if ( this == & other) return * this;
-        cb_ = other.cb_;
-        other.cb_ = nullptr;
+        std::swap( cb_, other.cb_);
         return * this;
     }
 
