@@ -66,11 +66,17 @@ public:
 
     bool operator!() const noexcept;
 
-    class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void > {
+    class iterator {
     private:
         push_coroutine< T > *   c_{ nullptr };
 
     public:
+        typedef std::output_iterator_tag iterator_category;
+        typedef void value_type;
+        typedef void difference_type;
+        typedef void pointer;
+        typedef void reference;
+
         iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T > * c) noexcept :
@@ -143,11 +149,17 @@ public:
 
     bool operator!() const noexcept;
 
-    class iterator : public std::iterator< std::output_iterator_tag, void, void, void, void > {
+    class iterator {
     private:
         push_coroutine< T & >   *   c_{ nullptr };
 
     public:
+        typedef std::output_iterator_tag iterator_category;
+        typedef void value_type;
+        typedef void difference_type;
+        typedef void pointer;
+        typedef void reference;
+
         iterator() noexcept = default;
 
         explicit iterator( push_coroutine< T & > * c) noexcept :
