@@ -14,7 +14,7 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 
-#include <boost/context/continuation.hpp>
+#include <boost/context/fiber.hpp>
 
 #include <boost/coroutine2/detail/config.hpp>
 #include <boost/coroutine2/detail/forced_unwind.hpp>
@@ -33,7 +33,7 @@ namespace detail {
 template< typename T >
 void
 push_coroutine< T >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::continuation c = std::move( cb->c);
+    boost::context::fiber c = std::move( cb->c);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -44,41 +44,9 @@ template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc,
                                                    Fn && fn) :
-    c{},
-    other{ nullptr },
-    state{ state_t::unwind },
-    except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
-                    // create synthesized pull_coroutine< T >
-                    typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
-                    pull_coroutine< T > synthesized{ & synthesized_cb };
-                    other = & synthesized_cb;
-                    other->c = other->c.resume();
-                    if ( state_t::none == ( state & state_t::destroy) ) {
-                        try {
-                            auto fn = std::move( fn_);
-                            // call coroutine-fn with synthesized pull_coroutine as argument
-                            fn( synthesized);
-                        } catch ( boost::context::detail::forced_unwind const&) {
-                            throw;
-                        } catch (...) {
-                            // store other exceptions in exception-pointer
-                            except = std::current_exception();
-                        }
-                    }
-                    // set termination flags
-                    state |= state_t::complete;
-                    // jump back
-                    return other->c.resume();
-                 },
-                 std::forward< Fn >( fn) ) );
-#else
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::fiber && c) mutable {
                // create synthesized pull_coroutine< T >
                typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
                pull_coroutine< T > synthesized{ & synthesized_cb };
@@ -100,13 +68,43 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                state |= state_t::complete;
                // jump back
                return other->c.resume();
-            });
+            },
+            std::forward< Fn >( fn) ) },
+#else
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       [this,fn_=std::forward< Fn >( fn)](boost::context::fiber && c) mutable {
+          // create synthesized pull_coroutine< T >
+          typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
+          pull_coroutine< T > synthesized{ & synthesized_cb };
+          other = & synthesized_cb;
+          other->c = other->c.resume();
+          if ( state_t::none == ( state & state_t::destroy) ) {
+              try {
+                  auto fn = std::move( fn_);
+                  // call coroutine-fn with synthesized pull_coroutine as argument
+                  fn( synthesized);
+              } catch ( boost::context::detail::forced_unwind const&) {
+                  throw;
+              } catch (...) {
+                  // store other exceptions in exception-pointer
+                  except = std::current_exception();
+              }
+          }
+          // set termination flags
+          state |= state_t::complete;
+          // jump back
+          return other->c.resume();
+       } },
 #endif
+    other{ nullptr },
+    state{ state_t::unwind },
+    except{} {
+        c = c.resume();
 }
 
 template< typename T >
 push_coroutine< T >::control_block::control_block( typename pull_coroutine< T >::control_block * cb,
-                                                   boost::context::continuation & c_) noexcept :
+                                                   boost::context::fiber & c_) noexcept :
     c{ std::move( c_) },
     other{ cb },
     state{ state_t::none },
@@ -157,7 +155,7 @@ push_coroutine< T >::control_block::valid() const noexcept {
 template< typename T >
 void
 push_coroutine< T & >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::continuation c = std::move( cb->c);
+    boost::context::fiber c = std::move( cb->c);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -168,41 +166,9 @@ template< typename T >
 template< typename StackAllocator, typename Fn >
 push_coroutine< T & >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc,
                                                      Fn && fn) :
-    c{},
-    other{ nullptr },
-    state{ state_t::unwind },
-    except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
-                    // create synthesized pull_coroutine< T & >
-                    typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
-                    pull_coroutine< T & > synthesized{ & synthesized_cb };
-                    other = & synthesized_cb;
-                    other->c = other->c.resume();
-                    if ( state_t::none == ( state & state_t::destroy) ) {
-                        try {
-                            auto fn = std::move( fn_);
-                            // call coroutine-fn with synthesized pull_coroutine as argument
-                            fn( synthesized);
-                        } catch ( boost::context::detail::forced_unwind const&) {
-                            throw;
-                        } catch (...) {
-                            // store other exceptions in exception-pointer
-                            except = std::current_exception();
-                        }
-                    }
-                    // set termination flags
-                    state |= state_t::complete;
-                    // jump back
-                    return other->c.resume();
-                 },
-                 std::forward< Fn >( fn) ) );
-#else
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::fiber && c) mutable {
                // create synthesized pull_coroutine< T & >
                typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
                pull_coroutine< T & > synthesized{ & synthesized_cb };
@@ -223,14 +189,45 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
-            });
+               other->c = other->c.resume();
+            },
+            std::forward< Fn >( fn) ) },
+#else
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       [this,fn_=std::forward< Fn >( fn)](boost::context::fiber && c) mutable {
+          // create synthesized pull_coroutine< T & >
+          typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
+          pull_coroutine< T & > synthesized{ & synthesized_cb };
+          other = & synthesized_cb;
+          other->c = other->c.resume();
+          if ( state_t::none == ( state & state_t::destroy) ) {
+              try {
+                  auto fn = std::move( fn_);
+                  // call coroutine-fn with synthesized pull_coroutine as argument
+                  fn( synthesized);
+              } catch ( boost::context::detail::forced_unwind const&) {
+                  throw;
+              } catch (...) {
+                  // store other exceptions in exception-pointer
+                  except = std::current_exception();
+              }
+          }
+          // set termination flags
+          state |= state_t::complete;
+          // jump back
+          other->c = other->c.resume();
+          return std::move( other->c);
+       } },
 #endif
+    other{ nullptr },
+    state{ state_t::unwind },
+    except{} {
+        c = c.resume();
 }
 
 template< typename T >
 push_coroutine< T & >::control_block::control_block( typename pull_coroutine< T & >::control_block * cb,
-                                                     boost::context::continuation & c_) noexcept :
+                                                     boost::context::fiber & c_) noexcept :
     c{ std::move( c_) },
     other{ cb },
     state{ state_t::none },
@@ -269,7 +266,7 @@ push_coroutine< T & >::control_block::valid() const noexcept {
 inline
 void
 push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
-    boost::context::continuation c = std::move( cb->c);
+    boost::context::fiber c = std::move( cb->c);
     // destroy control structure
     cb->~control_block();
     // destroy coroutine's stack
@@ -278,43 +275,11 @@ push_coroutine< void >::control_block::destroy( control_block * cb) noexcept {
 
 template< typename StackAllocator, typename Fn >
 push_coroutine< void >::control_block::control_block( context::preallocated palloc, StackAllocator && salloc, Fn && fn) :
-    c{},
-    other{ nullptr },
-    state{ state_t::unwind },
-    except{} {
 #if defined(BOOST_NO_CXX14_GENERIC_LAMBDAS)
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::continuation && c) mutable {
-                    // create synthesized pull_coroutine< void >
-                    typename pull_coroutine< void >::control_block synthesized_cb{ this, c };
-                    pull_coroutine< void > synthesized{ & synthesized_cb };
-                    other = & synthesized_cb;
-                    other->c =  other->c.resume();
-                    if ( state_t::none == ( state & state_t::destroy) ) {
-                        try {
-                            auto fn = std::move( fn_);
-                            // call coroutine-fn with synthesized pull_coroutine as argument
-                            fn( synthesized);
-                        } catch ( boost::context::detail::forced_unwind const&) {
-                            throw;
-                        } catch (...) {
-                            // store other exceptions in exception-pointer
-                            except = std::current_exception();
-                        }
-                    }
-                    // set termination flags
-                    state |= state_t::complete;
-                    // jump back
-                    return other->c.resume();
-                 },
-                 std::forward< Fn >( fn) ) );
-#else
-    c = boost::context::callcc(
-            std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
-            [this,fn_=std::forward< Fn >( fn)](boost::context::continuation && c) mutable {
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       wrap( [this](typename std::decay< Fn >::type & fn_,boost::context::fiber && c) mutable {
                // create synthesized pull_coroutine< void >
-               typename pull_coroutine< void >::control_block synthesized_cb{ this, c};
+               typename pull_coroutine< void >::control_block synthesized_cb{ this, c };
                pull_coroutine< void > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
                other->c = other->c.resume();
@@ -333,14 +298,46 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
-            });
+               other->c = other->c.resume();
+               return std::move( other->c);
+            },
+            std::forward< Fn >( fn) ) },
+#else
+    c{ std::allocator_arg, palloc, std::forward< StackAllocator >( salloc),
+       [this,fn_=std::forward< Fn >( fn)](boost::context::fiber && c) mutable {
+          // create synthesized pull_coroutine< void >
+          typename pull_coroutine< void >::control_block synthesized_cb{ this, c};
+          pull_coroutine< void > synthesized{ & synthesized_cb };
+          other = & synthesized_cb;
+          other->c = other->c.resume();
+          if ( state_t::none == ( state & state_t::destroy) ) {
+              try {
+                  auto fn = std::move( fn_);
+                  // call coroutine-fn with synthesized pull_coroutine as argument
+                  fn( synthesized);
+              } catch ( boost::context::detail::forced_unwind const&) {
+                  throw;
+              } catch (...) {
+                  // store other exceptions in exception-pointer
+                  except = std::current_exception();
+              }
+          }
+          // set termination flags
+          state |= state_t::complete;
+          // jump back
+          other->c = other->c.resume();
+          return std::move( other->c);
+       } },
 #endif
+    other{ nullptr },
+    state{ state_t::unwind },
+    except{} {
+        c = c.resume();
 }
 
 inline
 push_coroutine< void >::control_block::control_block( pull_coroutine< void >::control_block * cb,
-                                                      boost::context::continuation & c_) noexcept :
+                                                      boost::context::fiber & c_) noexcept :
     c{ std::move( c_) },
     other{ cb },
     state{ state_t::none },
