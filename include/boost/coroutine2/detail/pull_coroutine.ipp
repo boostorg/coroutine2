@@ -67,8 +67,8 @@ pull_coroutine< T >::~pull_coroutine() {
 
 template< typename T >
 pull_coroutine< T >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_{ other.cb_ } {
-    other.cb_ = nullptr;
+    cb_{ nullptr } {
+    std::swap( cb_, other.cb_);
 }
 
 template< typename T >
@@ -136,8 +136,8 @@ pull_coroutine< T & >::~pull_coroutine() {
 
 template< typename T >
 pull_coroutine< T & >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_{ other.cb_ } {
-    other.cb_ = nullptr;
+    cb_{ nullptr } {
+    std::swap( cb_, other.cb_);
 }
 
 template< typename T >
@@ -197,8 +197,8 @@ pull_coroutine< void >::~pull_coroutine() {
 
 inline
 pull_coroutine< void >::pull_coroutine( pull_coroutine && other) noexcept :
-    cb_{ other.cb_ } {
-    other.cb_ = nullptr;
+    cb_{ nullptr } {
+    std::swap( cb_, other.cb_);
 }
 
 inline
