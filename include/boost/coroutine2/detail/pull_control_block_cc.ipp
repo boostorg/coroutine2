@@ -67,7 +67,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
+               return std::move( other->c).resume();
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -92,7 +92,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
           // set termination flags
           state |= state_t::complete;
           // jump back
-          return other->c.resume();
+          return std::move( other->c).resume();
        } },
 #endif
     other{ nullptr },
@@ -100,7 +100,7 @@ pull_coroutine< T >::control_block::control_block( context::preallocated palloc,
     except{},
     bvalid{ false },
     storage{} {
-        c = c.resume();
+        c = std::move( c).resume();
         if ( except) {
             std::rethrow_exception( except);
         }
@@ -136,7 +136,7 @@ pull_coroutine< T >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T >::control_block::resume() {
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -215,7 +215,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
+               return std::move( other->c).resume();
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -240,7 +240,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
           // set termination flags
           state |= state_t::complete;
           // jump back
-          return other->c.resume();
+          return std::move( other->c).resume();
        } },
 #endif
     other{ nullptr },
@@ -248,7 +248,7 @@ pull_coroutine< T & >::control_block::control_block( context::preallocated pallo
     except{},
     bvalid{ false },
     storage{} {
-        c = c.resume();
+        c = std::move( c).resume();
         if ( except) {
             std::rethrow_exception( except);
         }
@@ -276,7 +276,7 @@ pull_coroutine< T & >::control_block::deallocate() noexcept {
 template< typename T >
 void
 pull_coroutine< T & >::control_block::resume() {
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -339,7 +339,7 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
+               return std::move( other->c).resume();
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -364,13 +364,13 @@ pull_coroutine< void >::control_block::control_block( context::preallocated pall
           // set termination flags
           state |= state_t::complete;
           // jump back to ctx
-          return other->c.resume();
+          return std::move( other->c).resume();
        } },
 #endif
     other{ nullptr },
     state{ state_t::unwind },
     except{} {
-        c = c.resume();
+        c = std::move( c).resume();
         if ( except) {
             std::rethrow_exception( except);
         }
@@ -396,7 +396,7 @@ pull_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 pull_coroutine< void >::control_block::resume() {
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
