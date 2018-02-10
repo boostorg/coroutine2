@@ -51,7 +51,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
                pull_coroutine< T > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = other->c.resume();
+               other->c = std::move( other->c).resume();
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -67,7 +67,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return other->c.resume();
+               return std::move( other->c).resume();
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -77,7 +77,7 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
           typename pull_coroutine< T >::control_block synthesized_cb{ this, c };
           pull_coroutine< T > synthesized{ & synthesized_cb };
           other = & synthesized_cb;
-          other->c = other->c.resume();
+          other->c = std::move( other->c).resume();
           if ( state_t::none == ( state & state_t::destroy) ) {
               try {
                   auto fn = std::move( fn_);
@@ -93,13 +93,13 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
           // set termination flags
           state |= state_t::complete;
           // jump back
-          return other->c.resume();
+          return std::move( other->c).resume();
        } },
 #endif
     other{ nullptr },
     state{ state_t::unwind },
     except{} {
-        c = c.resume();
+        c = std::move( c).resume();
 }
 
 template< typename T >
@@ -125,7 +125,7 @@ push_coroutine< T >::control_block::resume( T const& data) {
     // pass data to other context
     other->set( data);
     // resume other context
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -137,7 +137,7 @@ push_coroutine< T >::control_block::resume( T && data) {
     // pass data to other context
     other->set( std::move( data) );
     // resume other context
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -173,7 +173,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
                pull_coroutine< T & > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = other->c.resume();
+               other->c = std::move( other->c).resume();
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -189,7 +189,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               other->c = other->c.resume();
+               other->c = std::move( other->c).resume();
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -199,7 +199,7 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
           typename pull_coroutine< T & >::control_block synthesized_cb{ this, c };
           pull_coroutine< T & > synthesized{ & synthesized_cb };
           other = & synthesized_cb;
-          other->c = other->c.resume();
+          other->c = std::move( other->c).resume();
           if ( state_t::none == ( state & state_t::destroy) ) {
               try {
                   auto fn = std::move( fn_);
@@ -215,14 +215,14 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
           // set termination flags
           state |= state_t::complete;
           // jump back
-          other->c = other->c.resume();
+          other->c = std::move( other->c).resume();
           return std::move( other->c);
        } },
 #endif
     other{ nullptr },
     state{ state_t::unwind },
     except{} {
-        c = c.resume();
+        c = std::move( c).resume();
 }
 
 template< typename T >
@@ -248,7 +248,7 @@ push_coroutine< T & >::control_block::resume( T & data) {
     // pass data to other context
     other->set( data);
     // resume other context
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
@@ -282,7 +282,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                typename pull_coroutine< void >::control_block synthesized_cb{ this, c };
                pull_coroutine< void > synthesized{ & synthesized_cb };
                other = & synthesized_cb;
-               other->c = other->c.resume();
+               other->c = std::move( other->c).resume();
                if ( state_t::none == ( state & state_t::destroy) ) {
                    try {
                        auto fn = std::move( fn_);
@@ -298,7 +298,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
                // set termination flags
                state |= state_t::complete;
                // jump back
-               other->c = other->c.resume();
+               other->c = std::move( other->c).resume();
                return std::move( other->c);
             },
             std::forward< Fn >( fn) ) },
@@ -309,7 +309,7 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
           typename pull_coroutine< void >::control_block synthesized_cb{ this, c};
           pull_coroutine< void > synthesized{ & synthesized_cb };
           other = & synthesized_cb;
-          other->c = other->c.resume();
+          other->c = std::move( other->c).resume();
           if ( state_t::none == ( state & state_t::destroy) ) {
               try {
                   auto fn = std::move( fn_);
@@ -325,14 +325,14 @@ push_coroutine< void >::control_block::control_block( context::preallocated pall
           // set termination flags
           state |= state_t::complete;
           // jump back
-          other->c = other->c.resume();
+          other->c = std::move( other->c).resume();
           return std::move( other->c);
        } },
 #endif
     other{ nullptr },
     state{ state_t::unwind },
     except{} {
-        c = c.resume();
+        c = std::move( c).resume();
 }
 
 inline
@@ -355,7 +355,7 @@ push_coroutine< void >::control_block::deallocate() noexcept {
 inline
 void
 push_coroutine< void >::control_block::resume() {
-    c = c.resume();
+    c = std::move( c).resume();
     if ( except) {
         std::rethrow_exception( except);
     }
