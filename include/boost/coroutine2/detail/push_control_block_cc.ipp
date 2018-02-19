@@ -67,7 +67,8 @@ push_coroutine< T >::control_block::control_block( context::preallocated palloc,
                // set termination flags
                state |= state_t::complete;
                // jump back
-               return std::move( other->c).resume();
+               other->c = std::move( other->c).resume();
+               return std::move( other->c);
             },
             std::forward< Fn >( fn) ) },
 #else
@@ -189,7 +190,8 @@ push_coroutine< T & >::control_block::control_block( context::preallocated pallo
                // set termination flags
                state |= state_t::complete;
                // jump back
-               other->c = std::move( other->c).resume();
+              other->c = std::move( other->c).resume();
+              return std::move( other->c);
             },
             std::forward< Fn >( fn) ) },
 #else
