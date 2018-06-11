@@ -76,7 +76,7 @@ As an example, the code below will result in undefined behaviour:
 
         boost::coroutines2::coroutine<void>::push_type coro(
             [&](boost::coroutines2::coroutine<void>::pull_type& yield){
-                yield();
+                coro();
         });
         coro();
 
