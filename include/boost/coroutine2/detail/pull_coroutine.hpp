@@ -55,7 +55,6 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this == & other) return * this;
         std::swap( cb_, other.cb_);
         return * this;
     }
@@ -104,16 +103,6 @@ public:
             fetch_();
         }
 
-        iterator( iterator const& other) noexcept :
-            c_{ other.c_ } {
-        }
-
-        iterator & operator=( iterator const& other) noexcept {
-            if ( this == & other) return * this;
-            c_ = other.c_;
-            return * this;
-        }
-
         bool operator==( iterator const& other) const noexcept {
             return other.c_ == c_;
         }
@@ -127,7 +116,9 @@ public:
             return * this;
         }
 
-        iterator operator++( int) = delete;
+        void operator++( int) {
+            increment_();
+        }
 
         reference_t operator*() const noexcept {
             return c_->cb_->get();
@@ -172,7 +163,6 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this == & other) return * this;
         std::swap( cb_, other.cb_);
         return * this;
     }
@@ -221,16 +211,6 @@ public:
             fetch_();
         }
 
-        iterator( iterator const& other) noexcept :
-            c_{ other.c_ } {
-        }
-
-        iterator & operator=( iterator const& other) noexcept {
-            if ( this == & other) return * this;
-            c_ = other.c_;
-            return * this;
-        }
-
         bool operator==( iterator const& other) const noexcept {
             return other.c_ == c_;
         }
@@ -244,7 +224,9 @@ public:
             return * this;
         }
 
-        iterator operator++( int) = delete;
+        void operator++( int) {
+            increment_();
+        }
 
         reference_t operator*() const noexcept {
             return c_->cb_->get();
@@ -287,7 +269,6 @@ public:
     pull_coroutine( pull_coroutine &&) noexcept;
 
     pull_coroutine & operator=( pull_coroutine && other) noexcept {
-        if ( this == & other) return * this;
         std::swap( cb_, other.cb_);
         return * this;
     }
