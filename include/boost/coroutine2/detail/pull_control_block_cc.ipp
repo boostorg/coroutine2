@@ -14,6 +14,7 @@
 
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
+#include <boost/context/detail/config.hpp>
 
 #include <boost/context/fiber.hpp>
 
