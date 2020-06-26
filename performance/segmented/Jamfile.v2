@@ -19,8 +19,8 @@ project boost/coroutine2/performance/segmented_stack
       <library>/boost/coroutine//boost_coroutine
       <library>/boost/program_options//boost_program_options
       <segmented-stacks>on
-      <toolset>gcc,<segmented-stacks>on:<cxxflags>-fsplit-stack
-      <toolset>gcc,<segmented-stacks>on:<cxxflags>-DBOOST_USE_SEGMENTED_STACKS
+      <target-os>linux,<toolset>gcc,<segmented-stacks>on:<cxxflags>-fsplit-stack
+      <target-os>linux,<toolset>gcc,<segmented-stacks>on:<cxxflags>-DBOOST_USE_SEGMENTED_STACKS
       <toolset>clang,<segmented-stacks>on:<cxxflags>-fsplit-stack
       <toolset>clang,<segmented-stacks>on:<cxxflags>-DBOOST_USE_SEGMENTED_STACKS
       <link>static
