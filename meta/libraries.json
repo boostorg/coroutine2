@@ -8,8 +8,8 @@
     "category": [
         "Concurrent"
     ],
-    "cxxstd": "11",
     "maintainers": [
         "Oliver Kowalke <oliver.kowalke -at- gmail.com>"
-    ]
+    ],
+    "cxxstd": "11"
 }
