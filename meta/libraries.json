@@ -10,5 +10,6 @@
     ],
     "maintainers": [
         "Oliver Kowalke <oliver.kowalke -at- gmail.com>"
-    ]
+    ],
+    "cxxstd": "11"
 }

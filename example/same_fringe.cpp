@@ -97,8 +97,8 @@ int main() {
                     traverse(left_d,out);
                     });
             std::cout << "left tree from d:\n";
-            std::copy(begin(left_d_reader),
-                    end(left_d_reader),
+            std::copy(std::begin(left_d_reader),
+                    std::end(left_d_reader),
                     std::ostream_iterator<std::string>(std::cout, " "));
             std::cout << std::endl;
 
@@ -107,8 +107,8 @@ int main() {
                     traverse(right_b,out);
                     });
             std::cout << "right tree from b:\n";
-            std::copy(begin(right_b_reader),
-                    end(right_b_reader),
+            std::copy(std::begin(right_b_reader),
+                    std::end(right_b_reader),
                     std::ostream_iterator<std::string>(std::cout, " "));
             std::cout << std::endl;
 
@@ -117,8 +117,8 @@ int main() {
                     traverse(right_x,out);
                     });
             std::cout << "right tree from x:\n";
-            std::copy(begin(right_x_reader),
-                    end(right_x_reader),
+            std::copy(std::begin(right_x_reader),
+                    std::end(right_x_reader),
                     std::ostream_iterator<std::string>(std::cout, " "));
             std::cout << std::endl;
         }
@@ -139,9 +139,9 @@ int main() {
 
             std::cout << "left tree from d == right tree from b? "
                 << std::boolalpha
-                << std::equal(begin(left_d_reader),
-                        end(left_d_reader),
-                        begin(right_b_reader))
+                << std::equal(std::begin(left_d_reader),
+                        std::end(left_d_reader),
+                        std::begin(right_b_reader))
                 << std::endl;
         }
     }
@@ -161,9 +161,9 @@ int main() {
 
             std::cout << "left tree from d == right tree from x? "
                 << std::boolalpha
-                << std::equal(begin(left_d_reader),
-                        end(left_d_reader),
-                        begin(right_x_reader))
+                << std::equal(std::begin(left_d_reader),
+                        std::end(left_d_reader),
+                        std::begin(right_x_reader))
                 << std::endl;
         }
     }
