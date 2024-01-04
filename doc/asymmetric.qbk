@@ -247,7 +247,7 @@ pending __forced_unwind__ exception.]
 
         try {
             // code that might throw
-        } catch(const boost::coroutines2::detail::forced_unwind&) {
+        } catch(const boost::context::detail::forced_unwind&) {
             throw;
         } catch(...) {
             // possibly not re-throw pending exception
