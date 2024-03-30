@@ -7,9 +7,9 @@ import project ;
 
 project /boost/coroutine2
     : common-requirements
-        <source>/boost/assert//boost_assert
-        <source>/boost/config//boost_config
-        <source>/boost/context//boost_context
+        <library>/boost/assert//boost_assert
+        <library>/boost/config//boost_config
+        <library>/boost/context//boost_context
         <include>include
     ;
 
