@@ -12,6 +12,7 @@ import os ;
 import path ;
 import testing ;
 import toolset ;
+import-search /boost/config/checks ;
 import config : requires ;
 
 project
@@ -47,7 +48,7 @@ rule native-impl ( properties * )
 }
 
 test-suite minimal :
-[ run test_coroutine.cpp : 
+[ run test_coroutine.cpp :
     : :
     <context-impl>fcontext
     [ requires cxx11_auto_declarations
@@ -63,7 +64,7 @@ test-suite minimal :
                cxx11_variadic_templates ]
     : test_coroutine_asm ]
 
-[ run test_coroutine.cpp : 
+[ run test_coroutine.cpp :
     : :
     <conditional>@native-impl
     [ requires cxx11_auto_declarations
