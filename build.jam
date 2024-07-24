@@ -5,18 +5,21 @@
 
 require-b2 5.2 ;
 
+constant boost_dependencies :
+    /boost/assert//boost_assert
+    /boost/config//boost_config
+    /boost/context//boost_context ;
+
 project /boost/coroutine2
     : common-requirements
-        <library>/boost/assert//boost_assert
-        <library>/boost/config//boost_config
-        <library>/boost/context//boost_context
         <include>include
     ;
 
 explicit
-    [ alias boost_coroutine2 ]
+    [ alias boost_coroutine2 : : : : <library>$(boost_dependencies) ]
     [ alias all : boost_coroutine2 example test ]
     ;
 
 call-if : boost-library coroutine2
     ;
+
