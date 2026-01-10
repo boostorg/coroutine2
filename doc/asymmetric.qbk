@@ -253,7 +253,7 @@ pending __forced_unwind__ exception.]
             // possibly not re-throw pending exception
         }
 
-[important Do not jump from inside a catch block and than re-throw the
+[important Do not jump from inside a catch block and then re-throw the
 exception in another execution context.]
 
 
@@ -343,7 +343,7 @@ __pull_coro_op__; ['coroutine<>::pull_type::iterator::operator*()]
 roughly corresponds to __pull_coro_get__. An iterator originally obtained from
 __begin__ of an __pull_coro__ compares equal to an iterator obtained from
 __end__ of that same __pull_coro__ instance when its __pull_coro_bool__ would
-return `false`].
+return `false`.
 
 [note If `T` is a move-only type, then
 ['coroutine<T>::pull_type::iterator] may only be dereferenced once
@@ -377,7 +377,7 @@ routine. The __pull_coro__, __push_coro__ becomes complete, e.g. __pull_coro_boo
 __push_coro_bool__ will return `false`.
 
 [important After returning from __coro_fn__ the __coro__ is complete (can not
-resumed with __push_coro_op__, __pull_coro_op__).]
+be resumed with __push_coro_op__, __pull_coro_op__).]
 
 
 
