@@ -623,7 +623,7 @@ has returned (completed), the function returns `true`. Otherwise `false`.]]
     range_iterator< push_type< Arg > >::type end( push_type< Arg > &);
 
 [variablelist
-[[Returns:] [Returns a end range-iterator (output-iterator).]]
+[[Returns:] [Returns an end range-iterator (output-iterator).]]
 [[Note:] [When first obtained from `begin( push_type< R > &)`, or after some
 number of increment operations, an iterator will compare equal to the iterator
 returned by `end( push_type< R > &)` when the corresponding __push_coro_bool__
